@@ -1,0 +1,33 @@
+{
+  "name": "Cannergrow Exporter",
+  "description": "Download your transactions, team and more",
+  "homepage_url": "https://werteherren.de",
+  "version": "0.1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "activeTab", "scripting", "downloads"],
+  "content_scripts": [
+    {
+      "matches": ["https://*.backend.cannergrow.com/*"],
+      "js": ["js/browser-polyfill.min.js", "js/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "/images/WH16.png",
+      "32": "/images/WH32.png",
+      "48": "/images/WH48.png",
+      "128": "/images/WH128.png"
+    }
+  },
+  "icons": {
+    "16": "/images/WH16.png",
+    "32": "/images/WH32.png",
+    "48": "/images/WH48.png",
+    "128": "/images/WH128.png"
+  },
+  "options_page": "options.html"
+}

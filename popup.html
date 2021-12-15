@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="css/popup.css" />
+  <link rel="stylesheet" href="css/all.min.css" />
+  <script src="js/browser-polyfill.min.js"></script>
+  <script src="js/popup.js"></script>
+</head>
+
+<body>
+
+  <div id="whPluginOuter">
+    <div id="whPluginHeader">
+      <img
+        src="https://media.werteherren.de/images/werte-herren-logo.svg" class="logo"></img>
+      <h1>Cannergrow Exporter</h1>
+    </div>
+    <div id="whLoader">
+      <img src="https://media.werteherren.de/images/loader.svg" /><span><br />
+        Loading <span id="whLoaderMessage"></span></span>
+    </div>
+
+    <div id="whPluginContent">
+
+      <div id="whPluginTutorial">
+        <span>Dieses Plugin exportiert Team-Infos und Transaktionen aus Cannergrow. Du kannst sie im JSON-Format herunterladen oder f&uuml;r den Steuer-Rechner und den Rendite-Rechner von Werteherren.de verwenden.</span>
+        <h2>Um dieses Plugin zu benutzen:</h2>
+        <ol>
+          <li>Gehe auf <a target="blank"
+            href="https://cannergrow.com/r/XJ7QY3">Cannergrow.com</a> <i id="whCorrectPage" class="fas fa-check"></i></li>
+          <li>Logge dich ein <i id="whLoggedIn" class="fas fa-check"></i></li>
+          <li>Dr&uuml;cke auf "Sync"</li>
+        </ol>  
+      </div>
+
+      <div id="whPluginWorking">
+        <div id="whPluginSyncArea">
+          <button id="btnSyncData" type="button"><i class="fas fa-sync"></i> Sync</button><br />
+        </div>
+  
+        <div id="whPluginResult">
+          <table>
+            <tr>
+              <td>Username: </td>
+              <td id="spanUsername"></td>
+            </tr>
+            <tr>
+              <td>Letzter Sync: </td>
+              <td id="spanLastUpdate"></td>
+            </tr>
+            <tr>
+              <td>Transaktionen:</td>
+              <td id="spanTransactionsLength"></td>
+            </tr>
+            <tr>
+              <td>Pflanzen:</td>
+              <td id="spanPlantsLength"></td>
+            </tr>
+            <tr>
+              <td>Team:</td>
+              <td id="spanMembersLength"></td>
+            </tr>
+          </table>
+          <button id="btnReport" type="button"><i class="fas fa-chart-bar"></i>Steuer-Report<br />(Nur f&uuml;r Team-Mitglieder)</button><br />
+          <button id="btnReport" type="button"><i class="fas fa-chart-line"></i> Rendite-Rechner</button><br />
+          <button id="btnDownloadData" type="button">
+            <i class="fas fa-save"></i> Download</button>
+          <button id="btnDeleteData" type="button"><i class="fas fa-trash"></i> Reset</button>
+        </div>
+      </div>
+      
+    
+      <div id="whPluginAbout">
+        <a target="blank"
+        href="https://werteherren.de/impressum/">Impressum</a>&nbsp;
+        <a target="blank"
+        href="https://werteherren.de/datenschutzerklaerung/">Datenschutz</a>&nbsp;
+        <a target="blank"
+        href="https://werteherren.de/datenschutzerklaerung/">Hilfe</a>
+      </div>
+
+    </div>
+
+   
+
+  </div>
+
+
+
+</body>
+
+</html>
