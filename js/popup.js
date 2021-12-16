@@ -103,7 +103,7 @@ console.log("popup");
           browser.storage.local.get("status").then( ({status}) => {
             if (status.label === 'extracting') {
               showElement("whLoader", true);
-              document.getElementById('whLoaderMessage').innerText = (status.message || '') + ((status.percentage && ' - ' + status.percentage*100 + ' %') || '')
+              document.getElementById('whLoaderMessage').innerText = ((status.percentage && parseInt(status.percentage*100) + ' %' + ' - ') || '') + 'Loading ' + (status.message || '')
               showElement("whPluginContent", false);
             } else {
               showElement("whLoader", false);
@@ -122,6 +122,18 @@ console.log("popup");
                 Object.keys(whData.cannergrow)[0];
               var data = whData.cannergrow[username];
 
+              var members = []
+              var membersTotal = 0;
+              for (var i=1;i<8;i++) {
+                var arr = data['layer'+i]
+                if (arr) {
+                  membersTotal += arr.length
+                  members = members.concat(arr)
+                }
+              }
+
+    
+
               document.getElementById("spanUsername").innerHTML = username;
               document.getElementById("spanLastUpdate").innerHTML =
                 (data && data.date && niceDate(data.date)) || "Nie";
@@ -130,7 +142,7 @@ console.log("popup");
               document.getElementById("spanPlantsLength").innerText =
                 ((data && data.plants && data.plants.length) || '0') + '/' + ((data && data.plantsTotal) || '0');
               document.getElementById("spanMembersLength").innerText =
-                ((data && data.members && data.members.length) || '0') + '/' + ((data && data.membersTotal) || '0');
+                ((data && members && members.length) || '0') + '/' + ((data && membersTotal) || '0');
 
               
               showElement("whPluginResult", true);

@@ -25,29 +25,15 @@ console.log("werteherren fetch data");
     var d = localData.cannergrow[username]
     browser.storage.local.set({status: {label: 'extracting', percentage: 0.0 }})
     await fetchListOfResources('https://api.cannergrow.com/api/wallet/transactions?page=', 'transactions', 'data', 'label', 0, localData, username, token, 0.1, listOptions)
-    await fetchListOfResources('https://api.cannergrow.com/api/growing/plants?page=', 'plants', 'data', 'label', 0, localData, username, token, 0.15, listOptions)
-    await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=1&page=', 'members1', 'data', 'id', 0, localData, username, token, 0.2, listOptions)
-    d.members1 && d.members1.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=2&page=', 'members2', 'data', 'id', 0, localData, username, token, 0.25, listOptions)
-    d.members2 && d.members2.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=3&page=', 'members3', 'data', 'id', 0, localData, username, token, 0.3, listOptions)
-    d.members3 && d.members3.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=4&page=', 'members4', 'data', 'id', 0, localData, username, token, 0.35, listOptions)
-    d.members4 && d.members4.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=5&page=', 'members5', 'data', 'id', 0, localData, username, token, 0.4, listOptions)
-    d.members5 && d.members5.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=6&page=', 'members6', 'data', 'id', 0, localData, username, token, 0.45, listOptions)
-    d.members6 && d.members6.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=7&page=', 'members7', 'data', 'id', 0, localData, username, token, 0.5, listOptions)
-    await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team', 0, localData, username, token, 0.6)
-    await fetchSingleResource('https://api.cannergrow.com/api/user/team/layers', 'layers', 0, localData, username, token, 0.7)
-    await fetchSingleResource('https://api.cannergrow.com/api/growing/plants/rooms', 'rooms', 0, localData, username, token, 0.8)
-    await fetchSingleResource('https://api.cannergrow.com/api/growing/plants/overview', 'overview', 0, localData, username, token, 0.9)
-    
-    
-    
-    d.members = []
-    for (var i=1;i<8;i++) {
-      console.log('pushing', i)
-      var arr = d['members'+i]
-      if (arr) {
-        d.members = d.members.concat(arr)
-      }
+    await fetchListOfResources('https://api.cannergrow.com/api/growing/plants?page=', 'plants', 'data', 'label', 0, localData, username, token, 0.2, listOptions)
+    await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=1&page=', 'layer1', 'data', 'id', 0, localData, username, token, 0.3, listOptions)
+    for (var i=1;i<7;i++) {
+      d['layer' + i] && d['layer' + i].length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer='+(i+1)+'&page=', 'layer'+(i+1), 'data', 'id', 0, localData, username, token, 0.3 + i*0.1, listOptions)
     }
+    await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team', 0, localData, username, token, 0.95)
+    
+   
+
     console.log("saving", localData);
     browser.storage.local.set({ whData: localData }).then(() => {
       console.log('saved successfull');
@@ -132,11 +118,16 @@ async function fetchListOfResources(url, name, responseKey, matchKey, index, loc
               responseJson.data.length === 0
             ) {
               console.log('done extracting ' + name);
+              delete options.basePercentage
               resolve(localData)
       
             } else {
               sleep(500).then(async () => {
-                await fetchListOfResources(url, name, responseKey, matchKey, index + 1, localData, username, token, percentage, options);
+                console.log((d[name].length / responseJson.meta.total), d[name].length, responseJson.meta.total)
+                if (!options.basePercentage) {
+                  options.basePercentage = percentage
+                }
+                await fetchListOfResources(url, name, responseKey, matchKey, index + 1, localData, username, token, options.basePercentage + (d[name].length / responseJson.meta.total) * 0.1, options);
                 resolve(localData)
               });
             }
