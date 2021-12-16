@@ -101,7 +101,7 @@ console.log("popup");
         ) {
 
           browser.storage.local.get("status").then( ({status}) => {
-            if (status.label === 'extracting') {
+            if (status && status.label === 'extracting') {
               showElement("whLoader", true);
               document.getElementById('whLoaderMessage').innerText = ((status.percentage && parseInt(status.percentage*100) + ' %' + ' - ') || '') + 'Loading ' + (status.message || '')
               showElement("whPluginContent", false);

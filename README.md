@@ -1,6 +1,6 @@
 # cannergrow-exporter
 
-Cannergrow Exporter - Chrome Browser Plugin to download all your data as a json, e.g. to create a tax report or calculate net return
+Cannergrow Exporter - Chrome Browser Plugin to download all your data from Cannergrow (plants, team, transactions) as a json, e.g. to create a tax report or calculate net return
 
 ## Table of Contents
 
