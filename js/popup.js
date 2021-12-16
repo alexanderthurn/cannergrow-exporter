@@ -95,7 +95,7 @@ console.log("popup");
           tab.url.indexOf("backend.cannergrow.com/login")
         );
         if (
-          tab.url.indexOf("backend.cannergrow.com") > 0 &&
+          tab.url.indexOf("backend.cannergrow.com") >= 0 &&
           tab.url.indexOf("backend.cannergrow.com/login") < 0 &&
           tab.url.indexOf("backend.cannergrow.com/register") < 0
         ) {
@@ -146,6 +146,8 @@ console.log("popup");
 
               
               showElement("whPluginResult", true);
+              showElement("whPluginResultActionsCannergrow", true);
+              showElement("whPluginResultActionsInject", false);
               showElement("whPluginTutorial", false);
             } else {
               showElement("whPluginResult", false);
@@ -155,13 +157,20 @@ console.log("popup");
             showElement("whPluginWorking", true);
             showElement("whCorrectPage", true);
             showElement("whLoggedIn", true);
-            showElement("whPluginWorking", true);
           });
+        } else if (tab.url.indexOf("werteherren.de") > -1) {
+          showElement("whPluginWorking", true);
+          showElement("whPluginResultActionsCannergrow", false);
+          showElement("whPluginResultActionsInject", true);
+          showElement("whPluginTutorial", false);
+          showElement("whPluginSyncArea", false);
+          showElement("whLoader", false);
         } else {
           showElement("whPluginTutorial", true);
           showElement("whPluginWorking", false);
           showElement("whLoggedIn", false);
           showElement("whCorrectPage", false);
+          showElement("whLoader", false);
 
           if (tab.url.indexOf("backend.cannergrow.com") > 0) {
             showElement("whCorrectPage", true);
