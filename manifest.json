@@ -1,13 +1,13 @@
 {
   "name": "Cannergrow Exporter",
-  "description": "Download your transactions, team and more",
+  "description": "Download your transactions, team and more. Made by werteherren.de",
   "homepage_url": "https://werteherren.de",
   "version": "0.1.0",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "activeTab", "scripting", "downloads"],
+  "permissions": ["storage", "activeTab", "downloads"],
   "content_scripts": [
     {
       "matches": ["https://*.backend.cannergrow.com/*"],
