@@ -6,17 +6,14 @@ function injectData() {
     browser.storage.local.get("whData").then(async ({ whData }) => {
         if (whData && document.getElementById('whData')) {
             document.getElementById('whData').value = JSON.stringify(whData)
+            document.getElementById('whData').dispatchEvent(new Event('change'));
         }
     })
 }
 
-// listen for changes on cannergrow tab
-browser.storage.onChanged.addListener(function (changes, area) {
-    injectData();
+// data should be injected
+browser.runtime.onMessage.addListener((message) => {
+    if (message.action === 'inject') {
+        injectData();
+    }
 });
-
-
-// wait for the dom to load (maybe not needed?)
-window.onload = function() {
-    injectData();
-}

@@ -33,6 +33,24 @@ console.log("popup");
     });
   }
 
+  async function extractData() {
+    getCurrentTab().then((tab) => {
+      browser.tabs.sendMessage(tab.id, { action: "extract" }).then(response => {
+        console.log("Message from the content script:");
+        console.log(response);
+      }).catch((onError) => {console.log('error', onError)});
+    })
+  }
+
+  function injectData() {
+    getCurrentTab().then((tab) => {
+      browser.tabs.sendMessage(tab.id, { action: "inject" }).then(response => {
+        console.log("Message from the content script:");
+        console.log(response);
+      }).catch((onError) => {console.log('error', onError)});
+    })
+  }
+
   function downloadData() {
     const saveTemplateAsFile = (filename, dataObjToWrite) => {
       const blob = new Blob([JSON.stringify(dataObjToWrite, undefined, 2)], {
@@ -171,6 +189,9 @@ console.log("popup");
     document.getElementById("btnDeleteData").onclick = deleteData;
     document.getElementById("btnDownloadData").onclick = downloadData;
     document.getElementById("btnReport").onclick = openReport;
+    document.getElementById("btnInjectData").onclick = injectData;
+    document.getElementById("btnSyncData").onclick = extractData;
+
     updateView();
 
     browser.storage.onChanged.addListener(function (changes, area) {
@@ -178,19 +199,7 @@ console.log("popup");
       updateView();
     });
 
-    document
-      .getElementById("btnSyncData")
-      .addEventListener("click", async () => {
-        console.log('click2')
-
-        getCurrentTab().then((tab) => {
-          browser.tabs.sendMessage(tab.id, { action: "fetch" }).then(response => {
-            console.log("Message from the content script:");
-            console.log(response);
-          }).catch((onError) => {console.log('error', onError)});
-        })
-  
-      });
+   
   };
 
 })();

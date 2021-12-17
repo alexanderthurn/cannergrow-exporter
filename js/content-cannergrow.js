@@ -172,5 +172,8 @@ async function fetchSingleResource(url, name, index, localData, username, token,
 
 browser.runtime.onMessage.addListener((message) => {
   console.log("message", message);
-  contentFetchData();
+  
+  if (message.action === 'extract') {
+    contentFetchData();
+  }
 });
