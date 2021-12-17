@@ -43,6 +43,7 @@ console.log("popup");
   }
 
   function injectData() {
+
     getCurrentTab().then((tab) => {
       browser.tabs.sendMessage(tab.id, { action: "inject" }).then(response => {
         console.log("Message from the content script:");

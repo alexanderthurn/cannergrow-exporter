@@ -38,6 +38,7 @@ console.log("werteherren fetch data");
     browser.storage.local.set({ whData: localData }).then(() => {
       console.log('saved successfull');
     });
+    browser.runtime.sendMessage({action: 'setBadgeText', text: (100 + ' %') || ''})
 
 
     browser.storage.local.set({ status: {label: 'complete', percentage: 1.0 }})
@@ -111,8 +112,8 @@ async function fetchListOfResources(url, name, responseKey, matchKey, index, loc
             browser.storage.local.set({ whData: localData }).then(() => {
               console.log('saved successfull');
             });
-            //browser.action.setBadgeText({text: (percentage && percentage*100 + ' %') || ''});
-      
+            browser.runtime.sendMessage({action: 'setBadgeText', text: (percentage && percentage*100 + ' %') || ''})
+
             if (
               (options && options.lengthCheck && d[name].length === responseJson.meta.total) ||
               responseJson.data.length === 0
@@ -161,7 +162,8 @@ async function fetchSingleResource(url, name, index, localData, username, token,
           browser.storage.local.set({ whData: localData }).then(() => {
             console.log('saved ' + name);
           });
-         // browser.action.setBadgeText({text: (percentage && percentage*100 + ' %') || ''});
+         browser.runtime.sendMessage({action: 'setBadgeText', text: (percentage && percentage*100 + ' %') || ''})
+ 
           resolve(localData)
         })
       })
