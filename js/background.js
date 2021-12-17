@@ -22,3 +22,34 @@ browser.runtime.onMessage.addListener((message) => {
     
   }
 });
+
+
+async function updateView() {
+  var { status } = await browser.storage.local.get("status");
+
+  if (status) {
+    if (status.label === 'extracting') {
+      browser.action.setBadgeText({text: status && (status.percentage && parseInt(status.percentage*100) + ' %') || ''});
+      browser.action.setBadgeBackgroundColor({color: '#000000'});
+    } else if (status.label === 'new') {
+      browser.action.setBadgeText({text: ''});
+      browser.action.setBadgeBackgroundColor({color: '#999900'});
+    } else if (status.label === 'complete') {
+      browser.action.setBadgeText({text: '100%'});
+      browser.action.setBadgeBackgroundColor({color: '#00aa00'});
+    } else if (status.label === 'error') {
+      browser.action.setBadgeText({text: 'Err'});
+      browser.action.setBadgeBackgroundColor({color: '#aa0000'});
+    }
+  } else {
+    browser.action.setBadgeText({text: ''});
+    browser.action.setBadgeBackgroundColor({color: '#aa0000'});
+  }
+}
+
+browser.storage.onChanged.addListener(async function (changes, area) {
+  updateView()
+});
+
+
+updateView()

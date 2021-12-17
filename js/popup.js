@@ -169,7 +169,7 @@ console.log("popup");
         browser.action.setBadgeText({ text: "" });
       }
 
-      if (whData) {
+      if (whData && status.label === 'complete') {
         showElement("whPluginResult", true);
         showElement("whPluginResultActionsCannergrow", true);
         showElement("whPluginResultActionsInject", false);

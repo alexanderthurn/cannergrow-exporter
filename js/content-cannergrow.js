@@ -1,50 +1,46 @@
 console.log("werteherren content script");
-browser.storage.local.set({ status: {label: 'new' }})
 
 
 async function contentFetchData() {
+
   
-console.log("werteherren fetch data");
+  browser.storage.local.set({ status: {label: 'new', percentage: 0.0  }})
+
+  
+  console.log("werteherren fetch data");
 
   var username = document
     .getElementsByClassName("user-block-name")[0]
     .innerText.split(",")[1]
     .trim();
   var token = JSON.parse(localStorage.getItem("vuex")).token.access_token;
+  var { localData } = await browser.storage.local.get("whData");
+  if (!localData) {
+    localData = { cannergrow: {} };
+    localData.cannergrow[username] = {};
+    localData.cannergrow[username].username = username;
+    localData.cannergrow[username].version = "1";
+  }
 
-  browser.storage.local.get("whData").then(async ({ whData }) => {
-    var localData = whData;
-    if (!localData) {
-      localData = { cannergrow: {} };
-      localData.cannergrow[username] = {};
-      localData.cannergrow[username].username = username;
-      localData.cannergrow[username].version = "1";
-    }
+  var listOptions = {lengthCheck: true}
+  var d = localData.cannergrow[username]
+  browser.storage.local.set({status: {label: 'extracting', percentage: 0.0 }})
+  await fetchListOfResources('https://api.cannergrow.com/api/wallet/transactions?page=', 'transactions', 'data', 'label', 0, localData, username, token, 0.1, listOptions)
+  await fetchListOfResources('https://api.cannergrow.com/api/growing/plants?page=', 'plants', 'data', 'label', 0, localData, username, token, 0.2, listOptions)
+  await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=1&page=', 'layer1', 'data', 'id', 0, localData, username, token, 0.3, listOptions)
+  for (var i=1;i<7;i++) {
+    d['layer' + i] && d['layer' + i].length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer='+(i+1)+'&page=', 'layer'+(i+1), 'data', 'id', 0, localData, username, token, 0.3 + i*0.1, listOptions)
+  }
+  await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team', 0, localData, username, token, 0.95)
 
-    var listOptions = {lengthCheck: true}
-    var d = localData.cannergrow[username]
-    browser.storage.local.set({status: {label: 'extracting', percentage: 0.0 }})
-    await fetchListOfResources('https://api.cannergrow.com/api/wallet/transactions?page=', 'transactions', 'data', 'label', 0, localData, username, token, 0.1, listOptions)
-    await fetchListOfResources('https://api.cannergrow.com/api/growing/plants?page=', 'plants', 'data', 'label', 0, localData, username, token, 0.2, listOptions)
-    await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=1&page=', 'layer1', 'data', 'id', 0, localData, username, token, 0.3, listOptions)
-    for (var i=1;i<7;i++) {
-      d['layer' + i] && d['layer' + i].length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer='+(i+1)+'&page=', 'layer'+(i+1), 'data', 'id', 0, localData, username, token, 0.3 + i*0.1, listOptions)
-    }
-    await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team', 0, localData, username, token, 0.95)
-    
-   
-
-    console.log("saving", localData);
-    browser.storage.local.set({ whData: localData }).then(() => {
-      console.log('saved successfull');
-    });
-    browser.runtime.sendMessage({action: 'setBadgeText', text: (100 + ' %') || ''})
-
-
-    browser.storage.local.set({ status: {label: 'complete', percentage: 1.0 }})
-
-
+  addTimestamp(d);
+  console.log("saving", localData);
+  browser.storage.local.set({ whData: localData }).then(() => {
+    console.log('saved successfull');
   });
+  browser.runtime.sendMessage({action: 'setBadgeText', text: (100 + ' %') || ''})
+  browser.storage.local.set({ status: {label: 'complete', percentage: 1.0 }})
+
 }
 
 function sleep(time) {
@@ -91,31 +87,32 @@ async function fetchListOfResources(url, name, responseKey, matchKey, index, loc
             var responseJson = JSON.parse(text); // data, links, meta, types
             var d = localData.cannergrow[username]
             if (!d[name]) {
-              d[name] = []
+              d[name] = {
+                total: 0,
+                data: []
+              }
             }
 
             if (responseJson[responseKey].length > 0) {
     
               responseJson[responseKey].forEach((tx) => {
-                  if (!d[name].find((x) => x[matchKey] === tx[matchKey])
+                  if (!d[name].data.find((x) => x[matchKey] === tx[matchKey])
                   ) {
-                    d[name].push(tx);
+                    d[name].data.push(tx);
                   }
               });
 
             }
       
-            addTimestamp(d);
-            d[name + 'Total'] = responseJson.meta.total
+            d[name].total = responseJson.meta.total
       
             console.log("saving", localData);
             browser.storage.local.set({ whData: localData }).then(() => {
               console.log('saved successfull');
             });
-            browser.runtime.sendMessage({action: 'setBadgeText', text: (percentage && percentage*100 + ' %') || ''})
 
             if (
-              (options && options.lengthCheck && d[name].length === responseJson.meta.total) ||
+              (options && options.lengthCheck && d[name].data.length === responseJson.meta.total) ||
               responseJson.data.length === 0
             ) {
               console.log('done extracting ' + name);
@@ -124,11 +121,10 @@ async function fetchListOfResources(url, name, responseKey, matchKey, index, loc
       
             } else {
               sleep(500).then(async () => {
-                console.log((d[name].length / responseJson.meta.total), d[name].length, responseJson.meta.total)
                 if (!options.basePercentage) {
                   options.basePercentage = percentage
                 }
-                await fetchListOfResources(url, name, responseKey, matchKey, index + 1, localData, username, token, options.basePercentage + (d[name].length / responseJson.meta.total) * 0.1, options);
+                await fetchListOfResources(url, name, responseKey, matchKey, index + 1, localData, username, token, options.basePercentage + (d[name].data.length / responseJson.meta.total) * 0.1, options);
                 resolve(localData)
               });
             }
@@ -155,14 +151,12 @@ async function fetchSingleResource(url, name, index, localData, username, token,
       }).then((response) => {
         response.text().then((text) => {
           var responseJson = JSON.parse(text);
-          addTimestamp(localData.cannergrow[username]);
           var d = localData.cannergrow[username]
           d[name] = responseJson
           console.log('saving ' + name, localData);
           browser.storage.local.set({ whData: localData }).then(() => {
             console.log('saved ' + name);
           });
-         browser.runtime.sendMessage({action: 'setBadgeText', text: (percentage && percentage*100 + ' %') || ''})
  
           resolve(localData)
         })
@@ -180,6 +174,7 @@ browser.runtime.onMessage.addListener((message) => {
   }
 });
 
-browser.runtime.onSuspend.addListener(() => {
-  console.log("Unloading content script");
+document.body.addEventListener("click", function() {
+  console.log('clicklckkk')
+ // myPort.postMessage({greeting: "they clicked the page!"});
 });
