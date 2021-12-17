@@ -179,3 +179,7 @@ browser.runtime.onMessage.addListener((message) => {
     contentFetchData();
   }
 });
+
+browser.runtime.onSuspend.addListener(() => {
+  console.log("Unloading content script");
+});

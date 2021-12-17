@@ -18,5 +18,7 @@ browser.runtime.onMessage.addListener((message) => {
   
   if (message.action === 'setBadgeText') {
     browser.action.setBadgeText({text: message.text});
+  } else if (message.action === 'downloadURL') {
+    
   }
 });
