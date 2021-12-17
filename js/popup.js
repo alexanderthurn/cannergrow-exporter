@@ -3,9 +3,14 @@ console.log('popup');
 (function () {
   'use strict';
 
-  function showElement(elemId) {
-    var elem = document.getElementById(elemId);
-    elem.classList.contains('invisible') && elem.classList.remove('invisible');
+  function showElement(elemId, visible) {
+    if (visible === undefined || visible === true) {
+      var elem = document.getElementById(elemId);
+      elem.classList.contains('invisible') && elem.classList.remove('invisible');
+    } else {
+      hideElement(elemId)
+    }
+   
   }
 
   function hideElement(elemId) {
@@ -66,17 +71,17 @@ console.log('popup');
   }
 
   async function deleteData() {
-    document.getElementById('whLoaderMessage').innerText = '';
     await browser.storage.local.clear();
   }
 
   async function extractData() {
-    browser.storage.local.set({ status: {label: 'start', percentage: 0.0  }})
+    await deleteData()
+    browser.storage.local.set({ whStatus: {label: 'start', percentage: 0.0  }})
   }
 
   async function abortExtraction() {
     await deleteData()
-    browser.storage.local.set({ status: {label: 'idle', percentage: 0.0  }})
+    browser.storage.local.set({ whStatus: {label: 'idle', percentage: 0.0  }})
   }
   
 
@@ -107,20 +112,24 @@ console.log('popup');
   async function updateView() {
     var tab = await getCurrentTab();
     console.log('updateView', tab);
-    var { status } = await browser.storage.local.get('status');
+    var { whStatus } = await browser.storage.local.get('whStatus');
     var { whData } = await browser.storage.local.get('whData');
+    var { whSession } = await browser.storage.local.get('whSession');
+    var loggedIn = whSession?.cannergrow?.loggedin
 
     if (whData) {
       var username =
         whData.cannergrow &&
         Object.keys(whData.cannergrow).length > 0 &&
         Object.keys(whData.cannergrow)[0];
-      var data = whData.cannergrow[username];
+      var data = whData?.cannergrow[username];
 
+      console.log('whData', whData, data)
       var members = [];
       var membersTotal = 0;
       for (var i = 1; i < 8; i++) {
         var arr = data['layer' + i]?.data;
+        console.log('arr', arr)
         if (arr) {
           membersTotal += arr.length;
           members = members.concat(arr);
@@ -139,62 +148,25 @@ console.log('popup');
         '/' +
         (data?.plants?.total || '0');
       document.getElementById('spanMembersLength').innerText =
-        (data?.members?.length || '0') +
+        (members?.length || '0') +
         '/' +
-        (data?.members?.total || '0');
+        (membersTotal || '0');
     }
 
-
-
-    if (status && status.label === 'inprogress') {
-      document.getElementById('whLoaderMessage').innerText = ((status.percentage && parseInt(status.percentage * 100) + ' %' + ' - ') || '') +
+    if (whStatus?.label === 'inprogress') {
+      document.getElementById('whLoaderMessage').innerText = ((whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %' + ' - ') || '') +
         'Loading ' +
-        (status.message || '');
-        showElement('whLoader');
-        hideElement('whPluginContent');
-    } else {
-      hideElement('whLoader');
-      showElement('whPluginContent');
-    }
+        (whStatus.message || '');
+    } 
 
-    if (status && status.label === 'complete') {
-      showElement('whPluginResult');
-    } else {
-      hideElement('whPluginResult');
-    }
-
-    if (
-      tab.url.indexOf('backend.cannergrow.com') >= 0 &&
-      tab.url.indexOf('backend.cannergrow.com/login') < 0 &&
-      tab.url.indexOf('backend.cannergrow.com/register') < 0
-    ) {
-      showElement('whPluginActionsCannergrow');
-      hideElement('whPluginActionsWerteherren');
-      hideElement('whPluginTutorial');
-      showElement('whLoggedIn');
-      showElement('whCorrectPage');
-    } else if (tab.url.indexOf('backend.cannergrow.com') > 0) { 
-      hideElement('whPluginActionsCannergrow');
-      hideElement('whPluginActionsWerteherren');
-      showElement('whPluginTutorial');
-      hideElement('whLoggedIn');
-      showElement('whCorrectPage');
-    } else if (tab.url.indexOf('werteherren.de') > -1) {
-      hideElement('whPluginActionsCannergrow');
-      showElement('whPluginActionsWerteherren');
-      hideElement('whPluginTutorial');
-      hideElement('whLoggedIn');
-      hideElement('whCorrectPage');
-    } else {
-      hideElement('whPluginActionsCannergrow');
-      hideElement('whPluginActionsWerteherren');
-      showElement('whPluginTutorial');
-      showElement('whLoggedIn');
-      showElement('whCorrectPage');
-    }
-
-
-    
+    showElement('whLoader', whStatus?.label === 'inprogress');
+    showElement('whPluginContent', whStatus?.label !== 'inprogress');
+    showElement('whPluginResult', whStatus?.label === 'complete');
+    showElement('whPluginTutorial', !loggedIn || whStatus?.label !== 'complete')
+    showElement('whLoggedIn', loggedIn);
+    showElement('whPluginActionsCannergrow', loggedIn && tab.url.indexOf('backend.cannergrow.com') >= 0);
+    showElement('whCorrectPage', tab.url.indexOf('backend.cannergrow.com') >= 0);
+    showElement('whPluginActionsWerteherren', tab.url.indexOf('werteherren.de') > -1);
 
   }
 

@@ -13,6 +13,7 @@ browser.runtime.onSuspend.addListener(() => {
   //browser.action.setBadgeText({text: ""});
 });
 
+/*
 console.log('werteherren service worker addListener')
 browser.runtime.onMessage.addListener((message) => {
   
@@ -22,28 +23,28 @@ browser.runtime.onMessage.addListener((message) => {
     
   }
 });
-
+*/
 
 async function updateView() {
-  var { status } = await browser.storage.local.get("status");
+  var { whStatus } = await browser.storage.local.get("whStatus");
 
-  if (status) {
-    if (status.label === 'inprogress') {
-      browser.action.setBadgeText({text: status && (status.percentage && parseInt(status.percentage*100) + ' %') || ''});
+  if (whStatus) {
+    if (whStatus.label === 'inprogress') {
+      browser.action.setBadgeText({text: whStatus && (whStatus.percentage && parseInt(whStatus.percentage*100) + ' %') || ''});
       browser.action.setBadgeBackgroundColor({color: '#000000'});
-    } else if (status.label === 'start') {
-      browser.action.setBadgeText({text: 'new'});
+    } else if (whStatus.label === 'start') {
+      browser.action.setBadgeText({text: 'start'});
       browser.action.setBadgeBackgroundColor({color: '#999900'});
-    } else if (status.label === 'complete') {
+    } else if (whStatus.label === 'complete') {
       browser.action.setBadgeText({text: '100%'});
       browser.action.setBadgeBackgroundColor({color: '#00aa00'});
-    } else if (status.label === 'error') {
+    } else if (whStatus.label === 'error') {
       browser.action.setBadgeText({text: 'Err'});
       browser.action.setBadgeBackgroundColor({color: '#aa0000'});
-    } else if (status.label === 'idle'){
+    } else if (whStatus.label === 'idle'){
       browser.action.setBadgeText({text: ''});
     } else {
-      browser.action.setBadgeText({text: status.label});
+      browser.action.setBadgeText({text: whStatus.label});
     }
   } else {
     browser.action.setBadgeText({text: ''});
@@ -57,12 +58,236 @@ browser.storage.onChanged.addListener(async function (changes, area) {
 
 updateView()
 
-fetch('https://api.cannergrow.com/api/user/team', {
-  headers: new Headers({ Authorization: "Bearer " + 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS5jYW5uZXJncm93LmNvbS9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTYzOTY3ODcwNiwiZXhwIjoxNjM5NzY1MTA2LCJuYmYiOjE2Mzk2Nzg3MDYsImp0aSI6IjFjczI0U1F2SnFNaUE2M0YiLCJzdWIiOiI3MDgyMCIsInBydiI6ImUxNmQ5OWU2MTA5ZmE5ODc5NWMxZDRkNzVmOGE1ODNmMTU1NTVhNmMifQ.BJc95GQlLmHDPAx79kPKLdCH4oq5uiSlirYHCXhmlY8' }),
-}).then((response) => {
-    console.log('then ', response);
-}).catch((e) => {
-  console.log('catch', e)
-}).finally((f) => {
-  console.log('finally', f)
-})
+
+function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function addTimestamp(data) {
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth() + 1;
+  var day = now.getDate();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+  var dateToSave =
+    year +
+    "-" +
+    month +
+    "-" +
+    day +
+    " " +
+    hours +
+    ":" +
+    minutes +
+    ":" +
+    seconds;
+  data.timestamp = now.getTime();
+  data.date = dateToSave;
+}
+
+async function isCancelled() {
+  var { whStatus } = await browser.storage.local.get("whStatus");
+  if (whStatus) {
+    if (whStatus.label === 'inprogress') {
+       return false
+    } 
+  } 
+
+  return true
+}
+
+async function isLoggedIn() {
+  var { whSession } = await browser.storage.local.get("whSession");
+  return whSession?.cannergrow?.loggedin
+}
+
+async function contentFetchData() {
+  if (!isLoggedIn()) {
+    console.log('contentFetchData: not logged in')
+    return
+  }
+
+  console.log("werteherren fetch data");
+
+  var { whSession } = await browser.storage.local.get('whSession')
+  var username = whSession?.cannergrow?.username
+  var token = whSession?.cannergrow?.token
+
+  var { localData } = await browser.storage.local.get("whData");
+  if (!localData) {
+    localData = { cannergrow: {} };
+    localData.cannergrow[username] = {};
+    localData.cannergrow[username].username = username;
+    localData.cannergrow[username].version = "1";
+  }
+
+  var listOptions = {lengthCheck: true}
+  var d = localData.cannergrow[username]
+  browser.storage.local.set({whStatus: {label: 'inprogress', percentage: 0.0 }})
+
+  await fetchListOfResources('https://api.cannergrow.com/api/wallet/transactions?page=', 'transactions', 'data', 'label', 0, localData, username, token, 0.1, listOptions)
+  await fetchListOfResources('https://api.cannergrow.com/api/growing/plants?page=', 'plants', 'data', 'label', 0, localData, username, token, 0.2, listOptions)
+  await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=1&page=', 'layer1', 'data', 'id', 0, localData, username, token, 0.3, listOptions)
+  for (var i=1;i<7;i++) {
+    d['layer' + i]?.data && d['layer' + i]?.data.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer='+(i+1)+'&page=', 'layer'+(i+1), 'data', 'id', 0, localData, username, token, 0.3 + i*0.1, listOptions)
+  }
+  await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team', 0, localData, username, token, 0.95)
+
+  if (await isCancelled()) {
+    return
+  }
+  
+  addTimestamp(d);
+  console.log("saving", localData);
+  browser.storage.local.set({ whData: localData }).then(() => {
+    console.log('saved successfull');
+  });
+  browser.runtime.sendMessage({action: 'setBadgeText', text: (100 + ' %') || ''})
+  browser.storage.local.set({ whStatus: {label: 'complete', percentage: 1.0 }})
+
+}
+
+
+async function fetchListOfResources(url, name, responseKey, matchKey, index, localData, username, token, percentage, options) {
+
+  if (await isCancelled()) {
+    return
+  }
+
+  var d = localData.cannergrow[username]
+  if (d[name] && d[name].total > 0 && d[name].data && d[name].data.length === d[name].total) {
+    return
+  }
+
+  browser.storage.local.set({whStatus: {label: 'inprogress', message: name, percentage: percentage }})
+
+  let promise = new Promise((resolve, reject) => {
+
+    sleep(1000).then(() => {
+      console.log('fetchRs', url+ index, name, responseKey, matchKey, index, localData, username, token, options)
+
+        fetch(url + index, {
+          headers: new Headers({ Authorization: "Bearer " + token }),
+        }).then((response) => {
+          response.text().then(async (text) => {
+            var responseJson = JSON.parse(text); // data, links, meta, types
+            var d = localData.cannergrow[username]
+            if (!d[name]) {
+              d[name] = {
+                total: 0,
+                data: []
+              }
+            }
+
+            if (responseJson[responseKey].length > 0) {
+    
+              responseJson[responseKey].forEach((tx) => {
+                  if (!d[name].data.find((x) => x[matchKey] === tx[matchKey])
+                  ) {
+                    d[name].data.push(tx);
+                  }
+              });
+
+            }
+      
+            d[name].total = responseJson.meta.total;
+      
+            if (await isCancelled()) {
+              resolve(null)
+              return
+            }
+
+            console.log("saving", localData);
+            browser.storage.local.set({ whData: localData }).then(() => {
+              console.log('saved successfull');
+            });
+
+            if (
+              (options && options.lengthCheck && d[name].data.length === responseJson.meta.total) ||
+              responseJson.data.length === 0
+            ) {
+              console.log('done extracting ' + name);
+              delete options.basePercentage
+              resolve(localData)
+      
+            } else {
+              sleep(500).then(async () => {
+                if (!options.basePercentage) {
+                  options.basePercentage = percentage
+                }
+                await fetchListOfResources(url, name, responseKey, matchKey, index + 1, localData, username, token, options.basePercentage + (d[name].data.length / responseJson.meta.total) * 0.1, options);
+                resolve(localData)
+              });
+            }
+          })
+        })
+    })
+
+
+    
+  })
+  
+  return promise;
+}
+
+async function fetchSingleResource(url, name, index, localData, username, token, percentage) {
+
+  if (await isCancelled()) {
+    return
+  }
+  
+  var d = localData.cannergrow[username]
+  if (d[name]) {
+    return
+  }
+
+
+  browser.storage.local.set({whStatus: {label: 'inprogress', message: name, percentage: percentage  }})
+
+  let promise = new Promise((resolve, reject) => {
+
+    sleep(1000).then(() => {
+      console.log('fetchTeam', index, localData, username, token)
+      fetch(url, {
+        headers: new Headers({ Authorization: "Bearer " + token }),
+      }).then((response) => {
+        response.text().then(async (text) => {
+          var responseJson = JSON.parse(text);
+          d[name] = responseJson;
+          if (await isCancelled()) {
+            resolve(null)
+            return
+          }
+          console.log('saving ' + name, localData);
+          browser.storage.local.set({ whData: localData }).then(() => {
+            console.log('saved ' + name);
+          });
+ 
+          resolve(localData)
+        })
+      })
+    })
+  })  
+  return promise;
+}
+
+async function updateData() {
+  var { whStatus } = await browser.storage.local.get('whStatus');
+  if (whStatus) {
+    if (whStatus.label === 'start' || whStatus.label === 'inprogress') {
+       contentFetchData()
+    } 
+  } 
+}
+
+
+browser.storage.onChanged.addListener(function (changes, area) {
+  if (changes?.whStatus?.newValue?.label === 'start') {
+    contentFetchData()
+  }
+});
+
+
+updateData()
