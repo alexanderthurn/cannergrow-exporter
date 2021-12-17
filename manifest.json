@@ -8,6 +8,7 @@
     "service_worker": "js/background.js"
   },
   "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://api.cannergrow.com/*"],
   "content_scripts": [
     {
       "matches": ["https://*.backend.cannergrow.com/*"],

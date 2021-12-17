@@ -12,94 +12,92 @@
 
   <div id="whPluginOuter">
     <div id="whPluginHeader">
-      <img
-        src="images/werte-herren-logo.svg" class="logo"></img>
+      <img src="images/werte-herren-logo.svg" class="logo"></img>
       <h1>Cannergrow Exporter</h1>
     </div>
+
     <div id="whLoader">
       <img src="images/loader.svg" /><span><br />
-      <span id="whLoaderMessage"></span></span>
+        <span id="whLoaderMessage"></span></span>
+        <button id="btnAbortSync" type="button"><i class="fas fa-hand-paper"></i> Abbrechen</button><br /><br />
     </div>
 
     <div id="whPluginContent">
 
       <div id="whPluginTutorial">
-        <span>Dieses Plugin exportiert Team-Infos und Transaktionen aus Cannergrow. Du kannst sie im JSON-Format herunterladen oder f&uuml;r den Steuer-Rechner und den Rendite-Rechner von Werteherren.de verwenden.</span>
+        <span>Dieses Plugin exportiert Team-Infos und Transaktionen aus Cannergrow. Du kannst sie im JSON-Format
+          herunterladen oder f&uuml;r den Steuer-Rechner und den Rendite-Rechner von Werteherren.de verwenden.</span>
         <h2>Um dieses Plugin zu benutzen:</h2>
         <ol>
-          <li>Gehe auf <a target="blank"
-            href="https://cannergrow.com/r/XJ7QY3">Cannergrow.com</a> <i id="whCorrectPage" class="fas fa-check"></i></li>
+          <li>Gehe auf <a target="blank" href="https://cannergrow.com/r/XJ7QY3">Cannergrow.com</a> <i id="whCorrectPage"
+              class="fas fa-check"></i></li>
           <li>Logge dich ein <i id="whLoggedIn" class="fas fa-check"></i></li>
-          <li>Dr&uuml;cke auf "Sync"</li>
-        </ol>  
+          <li>&Ouml;ffne dieses Plugin und dr&uuml;cke auf "Sync"</li>
+        </ol>
       </div>
 
-      <div id="whPluginWorking">
-        <div id="whPluginSyncArea">
-          <b>Cannergrow.com</b>
-          <button id="btnSyncData" type="button"><i class="fas fa-sync"></i> Sync</button><br /><br />
-        </div>
-  
-        <div id="whPluginResult">
-          <b>Gefundene Datens&auml;tze</b>
+      <div id="whPluginActionsCannergrow">
+        <b>Cannergrow.com</b>
+        <button id="btnSyncData" type="button"><i class="fas fa-sync"></i> Sync</button><br /><br />
+      </div>
 
-          <div id="whPluginResult0">
-            <table>
-              <tr>
-                <td>Username: </td>
-                <td id="spanUsername"></td>
-              </tr>
-              <tr>
-                <td>Letzter Sync: </td>
-                <td id="spanLastUpdate"></td>
-              </tr>
-              <tr>
-                <td>Transaktionen:</td>
-                <td id="spanTransactionsLength"></td>
-              </tr>
-              <tr>
-                <td>Pflanzen:</td>
-                <td id="spanPlantsLength"></td>
-              </tr>
-              <tr>
-                <td>Team:</td>
-                <td id="spanMembersLength"></td>
-              </tr>
-            </table>
-  
-            <div id="whPluginResultActionsCannergrow">
-              <button id="btnDownloadData" type="button">
+      <div id="whPluginResult">
+        <b>Gefundene Datens&auml;tze</b>
+
+        <div id="whPluginResult0">
+          <table>
+            <tr>
+              <td>Username: </td>
+              <td id="spanUsername"></td>
+            </tr>
+            <tr>
+              <td>Letzter Sync: </td>
+              <td id="spanLastUpdate"></td>
+            </tr>
+            <tr>
+              <td>Transaktionen:</td>
+              <td id="spanTransactionsLength"></td>
+            </tr>
+            <tr>
+              <td>Pflanzen:</td>
+              <td id="spanPlantsLength"></td>
+            </tr>
+            <tr>
+              <td>Team:</td>
+              <td id="spanMembersLength"></td>
+            </tr>
+          </table>
+
+          <div>
+            <button id="btnDownloadData" type="button">
               <i class="fas fa-save"></i> Download</button>
-              <button id="btnDeleteData" type="button"><i class="fas fa-trash"></i> Reset</button>
-              <br /><br />
-              <b>Werteherren.de</b>
-              <button id="btnReport" type="button"><i class="fas fa-chart-bar"></i>Steuer-Report<br />(Nur f&uuml;r Team-Mitglieder mit Pflanzen)</button><br />
-              <button id="btnReport" type="button"><i class="fas fa-chart-line"></i> Rendite-Rechner<br />(Kostenloser Account auf werteherren.de reicht aus)</button><br />    
-            </div>
-  
-            <div id="whPluginResultActionsInject">
-              <button id="btnInjectData" type="button">
-                <i class="fas fa-save"></i> Daten einf&uuml;gen</button>
-            </div>
+            <button id="btnDeleteData" type="button"><i class="fas fa-trash"></i> Reset</button>
+            <br /><br />
+            <b>Werteherren.de</b>
+            <button id="btnReport" type="button"><i class="fas fa-chart-bar"></i>Steuer-Report<br />(Nur f&uuml;r
+              Team-Mitglieder mit Pflanzen)</button><br />
+            <button id="btnReport" type="button"><i class="fas fa-chart-line"></i> Rendite-Rechner<br />(Kostenloser
+              Account auf werteherren.de reicht aus)</button><br />
           </div>
-          
 
+          <div id="whPluginActionsWerteherren">
+            <button id="btnInjectData" type="button">
+              <i class="fas fa-save"></i> Daten einf&uuml;gen</button>
           </div>
+        </div>
       </div>
-      
-    
-      <div id="whPluginAbout">
-        <a target="blank"
-        href="https://werteherren.de/impressum/">Impressum</a>&nbsp;
-        <a target="blank"
-        href="https://werteherren.de/datenschutzerklaerung/">Datenschutz</a>&nbsp;
-        <a target="blank"
-        href="https://werteherren.de/datenschutzerklaerung/">Hilfe</a>
-      </div>
-
     </div>
 
-   
+
+    <div id="whPluginAbout">
+      <a target="blank" href="https://werteherren.de/impressum/">Impressum</a>&nbsp;
+      <a target="blank" href="https://werteherren.de/datenschutzerklaerung/">Datenschutz</a>&nbsp;
+      <a target="blank" href="https://werteherren.de/datenschutzerklaerung/">Hilfe</a>
+    </div>
+
+  </div>
+
+
 
   </div>
 

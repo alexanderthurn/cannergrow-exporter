@@ -10,7 +10,7 @@ console.log('werteherren service worker')
 
 browser.runtime.onSuspend.addListener(() => {
   console.log("Unloading.");
-  browser.action.setBadgeText({text: ""});
+  //browser.action.setBadgeText({text: ""});
 });
 
 console.log('werteherren service worker addListener')
@@ -28,11 +28,11 @@ async function updateView() {
   var { status } = await browser.storage.local.get("status");
 
   if (status) {
-    if (status.label === 'extracting') {
+    if (status.label === 'inprogress') {
       browser.action.setBadgeText({text: status && (status.percentage && parseInt(status.percentage*100) + ' %') || ''});
       browser.action.setBadgeBackgroundColor({color: '#000000'});
-    } else if (status.label === 'new') {
-      browser.action.setBadgeText({text: ''});
+    } else if (status.label === 'start') {
+      browser.action.setBadgeText({text: 'new'});
       browser.action.setBadgeBackgroundColor({color: '#999900'});
     } else if (status.label === 'complete') {
       browser.action.setBadgeText({text: '100%'});
@@ -40,10 +40,13 @@ async function updateView() {
     } else if (status.label === 'error') {
       browser.action.setBadgeText({text: 'Err'});
       browser.action.setBadgeBackgroundColor({color: '#aa0000'});
+    } else if (status.label === 'idle'){
+      browser.action.setBadgeText({text: ''});
+    } else {
+      browser.action.setBadgeText({text: status.label});
     }
   } else {
     browser.action.setBadgeText({text: ''});
-    browser.action.setBadgeBackgroundColor({color: '#aa0000'});
   }
 }
 
@@ -53,3 +56,13 @@ browser.storage.onChanged.addListener(async function (changes, area) {
 
 
 updateView()
+
+fetch('https://api.cannergrow.com/api/user/team', {
+  headers: new Headers({ Authorization: "Bearer " + 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS5jYW5uZXJncm93LmNvbS9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTYzOTY3ODcwNiwiZXhwIjoxNjM5NzY1MTA2LCJuYmYiOjE2Mzk2Nzg3MDYsImp0aSI6IjFjczI0U1F2SnFNaUE2M0YiLCJzdWIiOiI3MDgyMCIsInBydiI6ImUxNmQ5OWU2MTA5ZmE5ODc5NWMxZDRkNzVmOGE1ODNmMTU1NTVhNmMifQ.BJc95GQlLmHDPAx79kPKLdCH4oq5uiSlirYHCXhmlY8' }),
+}).then((response) => {
+    console.log('then ', response);
+}).catch((e) => {
+  console.log('catch', e)
+}).finally((f) => {
+  console.log('finally', f)
+})
