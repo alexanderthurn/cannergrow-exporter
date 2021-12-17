@@ -71,7 +71,7 @@ console.log('popup');
   }
 
   async function deleteData() {
-    await browser.storage.local.clear();
+    await browser.storage.local.remove(['whData']);
   }
 
   async function extractData() {

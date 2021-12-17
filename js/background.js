@@ -116,7 +116,7 @@ async function isLoggedIn() {
 }
 
 async function contentFetchData() {
-  if (!isLoggedIn()) {
+  if (!(await isLoggedIn())) {
     console.log('contentFetchData: not logged in')
     return
   }
@@ -126,6 +126,11 @@ async function contentFetchData() {
   var { whSession } = await browser.storage.local.get('whSession')
   var username = whSession?.cannergrow?.username
   var token = whSession?.cannergrow?.token
+
+  if (!username || !token) {
+    console.log('something isnt right')
+    throw new Error('something is not right with username or token')
+  }
 
   var { localData } = await browser.storage.local.get("whData");
   if (!localData) {
@@ -164,7 +169,7 @@ async function contentFetchData() {
 
 async function fetchListOfResources(url, name, responseKey, matchKey, index, localData, username, token, percentage, options) {
 
-  if (await isCancelled()) {
+  if (await isCancelled() || (!await isLoggedIn())) {
     return
   }
 
@@ -206,7 +211,7 @@ async function fetchListOfResources(url, name, responseKey, matchKey, index, loc
       
             d[name].total = responseJson.meta.total;
       
-            if (await isCancelled()) {
+            if (await isCancelled() || (!await isLoggedIn())) {
               resolve(null)
               return
             }
@@ -268,7 +273,7 @@ async function fetchSingleResource(url, name, index, localData, username, token,
         response.text().then(async (text) => {
           var responseJson = JSON.parse(text);
           d[name] = responseJson;
-          if (await isCancelled()) {
+          if (await isCancelled() || (!await isLoggedIn())) {
             resolve(null)
             return
           }
