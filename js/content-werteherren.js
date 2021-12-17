@@ -2,7 +2,7 @@
 /* This script injects the whData json into an input element */
 
 // inject json into an input field with id whData
-function injectData() {
+async function injectData() {
     var { whData } = await browser.storage.local.get('whData');
     if (whData && document.getElementById('whData')) {
         document.getElementById('whData').value = JSON.stringify(whData)
@@ -16,3 +16,10 @@ browser.runtime.onMessage.addListener((message) => {
         injectData();
     }
 });
+
+
+window.onload = function() {
+   if (window.location.href.indexOf('inject=wh') >= 0) {
+      injectData();
+   }
+}

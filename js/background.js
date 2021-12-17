@@ -43,9 +43,9 @@ async function updateView() {
         Object.keys(whData.cannergrow).length > 0 &&
         Object.keys(whData.cannergrow)[0];
       var data = whData?.cannergrow[username];
-      if (now.getTime() - data?.timestamp > 1000*60) {
+      if (now.getTime() - data?.timestamp > 1000*60*60) {
         browser.action.setBadgeBackgroundColor({color: '#880000'});
-        browser.action.setBadgeText({text: 'Old'});
+        browser.action.setBadgeText({text: '100%'});
       } else {
         browser.action.setBadgeText({text: '100%'});
       }

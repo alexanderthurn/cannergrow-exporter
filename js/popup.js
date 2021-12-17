@@ -35,7 +35,14 @@ console.log('popup');
 
   function openReport() {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-tax-calculator.html',
+      'https://dev.werteherren.de/calculator/cannergrow-rendite-rechner-pro.html?inject=wh',
+      '_blank'
+    );
+  }
+
+  function openTaxReport() {
+    window.open(
+      'https://dev.werteherren.de/calculator/cannergrow-tax-calculator.html?inject=wh',
       '_blank'
     );
   }
@@ -175,6 +182,8 @@ console.log('popup');
     document.getElementById('btnDeleteData').onclick = deleteData;
     document.getElementById('btnDownloadData').onclick = downloadData;
     document.getElementById('btnReport').onclick = openReport;
+    document.getElementById('btnTaxReport').onclick = openTaxReport;
+    
     document.getElementById('btnInjectData').onclick = injectData;
     document.getElementById('btnSyncData').onclick = extractData;
     document.getElementById('btnAbortSync').onclick = abortExtraction
