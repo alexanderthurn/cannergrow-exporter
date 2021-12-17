@@ -27,6 +27,7 @@ browser.runtime.onMessage.addListener((message) => {
 
 async function updateView() {
   var { whStatus } = await browser.storage.local.get("whStatus");
+  var { whData } = await browser.storage.local.get("whData");
 
   if (whStatus) {
     if (whStatus.label === 'inprogress') {
@@ -36,8 +37,19 @@ async function updateView() {
       browser.action.setBadgeText({text: 'start'});
       browser.action.setBadgeBackgroundColor({color: '#999900'});
     } else if (whStatus.label === 'complete') {
-      browser.action.setBadgeText({text: '100%'});
-      browser.action.setBadgeBackgroundColor({color: '#00aa00'});
+      var now = new Date();
+      var username =
+        whData.cannergrow &&
+        Object.keys(whData.cannergrow).length > 0 &&
+        Object.keys(whData.cannergrow)[0];
+      var data = whData?.cannergrow[username];
+      if (now.getTime() - data?.timestamp > 1000*60) {
+        browser.action.setBadgeBackgroundColor({color: '#880000'});
+        browser.action.setBadgeText({text: 'Old'});
+      } else {
+        browser.action.setBadgeText({text: '100%'});
+      }
+
     } else if (whStatus.label === 'error') {
       browser.action.setBadgeText({text: 'Err'});
       browser.action.setBadgeBackgroundColor({color: '#aa0000'});
