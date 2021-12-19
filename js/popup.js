@@ -42,7 +42,14 @@ console.log('popup');
 
   function openTaxReport() {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-tax-calculator.html?inject=wh',
+      'https://dev.werteherren.de/calculator/cannergrow-steuer-helfer.html?inject=wh',
+      '_blank'
+    );
+  }
+
+  function openCannergrowBackend() {
+    window.open(
+      'https://cannergrow.com/r/XJ7QY3',
       '_blank'
     );
   }
@@ -183,6 +190,7 @@ console.log('popup');
     document.getElementById('btnDownloadData').onclick = downloadData;
     document.getElementById('btnReport').onclick = openReport;
     document.getElementById('btnTaxReport').onclick = openTaxReport;
+    document.getElementById('btnCannergrowBackend').onclick = openCannergrowBackend;
     
     document.getElementById('btnInjectData').onclick = injectData;
     document.getElementById('btnSyncData').onclick = extractData;
