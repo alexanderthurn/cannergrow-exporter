@@ -54,3 +54,4 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 * Clean check if we are on the correct page and logged in - Right now checking for /login and /register
 * Clean check if we can inject whData onto this page (e.g. by using content script message)
 * Multi User
+* Macbook Check
