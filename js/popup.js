@@ -114,6 +114,19 @@ console.log('popup');
     return canExtractResult
   }
 
+  async function canInject() {
+    var canInjectResult =  browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'canInject' }).then((response) => {
+      console.log('canInject response', response)
+      return response.ok
+      }).catch((ex) => {
+        console.log('canInject ex', ex)
+      })
+
+
+    console.log('canInject', canInjectResult)
+    return canInjectResult
+  }
+
   async function injectData() {
     await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'inject' })
   }
