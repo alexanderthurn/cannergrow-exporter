@@ -259,22 +259,26 @@ async function fetchData() {
     'plants',
     'data',
     'label',
-    0
+    0, optionsFast
   );
   for (var i = 0; i < 7; i++) {
-    (i === 0 || (d['layer' + i]?.data && d['layer' + i]?.data.length > 0)) &&
-      (await fetchListOfResources(
+    d = await getDataForCurrentUser();
+    console.log(i, d['layer' + i]?.data, d['layer' + i]?.data?.length > 0)
+    if ( (i === 0) || (d['layer' + i]?.data && d['layer' + i]?.data.length > 0)) {
+      await fetchListOfResources(
         'https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=' +
           (i + 1) +
           '&page=',
         'layer' + (i + 1),
         'data',
         'id',
-        0
-      ));
+        0, optionsFast
+      );
+    }
+      
   }
   
-  await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team');
+ // await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team');
 
   console.log('done fetching')
   if (isCancelled()) {
