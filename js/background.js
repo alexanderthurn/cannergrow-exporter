@@ -245,7 +245,7 @@ async function fetchData() {
   d.isComplete = false;
   await saveDataForCurrentUser(d);
 
-  /*
+  
   await fetchListOfResources(
     'https://api.cannergrow.com/api/wallet/transactions?page=',
     'transactions',
@@ -273,7 +273,7 @@ async function fetchData() {
         0
       ));
   }
-  */
+  
   await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team');
 
   console.log('done fetching')
@@ -308,7 +308,7 @@ async function fetchListOfResources(
   }
 
 
-  await sleep(500)
+  await sleep(50)
   console.log('fetchRs', url + index);
   var response = await fetch(url + index, { headers: new Headers({ Authorization: 'Bearer ' + getToken() })})
   var text = await response.text()
@@ -359,7 +359,7 @@ async function fetchSingleResource(url, name) {
     return;
   }
 
-  await sleep(500);
+  await sleep(50);
   console.log('fetchRs', url);
 
   var response = await fetch(url, {headers: new Headers({ Authorization: 'Bearer ' + getToken() })});
