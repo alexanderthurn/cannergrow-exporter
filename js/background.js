@@ -6,70 +6,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-console.log('werteherren service worker')
 
-browser.runtime.onSuspend.addListener(() => {
-  console.log("Unloading.");
-  //browser.action.setBadgeText({text: ""});
-});
+/* 
 
-/*
-console.log('werteherren service worker addListener')
-browser.runtime.onMessage.addListener((message) => {
-  
-  if (message.action === 'setBadgeText') {
-    browser.action.setBadgeText({text: message.text});
-  } else if (message.action === 'downloadURL') {
-    
-  }
-});
+  ------------------------------------------------------------------------------------------ HELPER ------------------------------------------------------------------------------------------
+
 */
-
-async function updateView() {
-  var { whStatus } = await browser.storage.local.get("whStatus");
-  var { whData } = await browser.storage.local.get("whData");
-
-  if (whStatus) {
-    if (whStatus.label === 'inprogress') {
-      browser.action.setBadgeText({text: whStatus && (whStatus.percentage && parseInt(whStatus.percentage*100) + ' %') || ''});
-      browser.action.setBadgeBackgroundColor({color: '#000000'});
-    } else if (whStatus.label === 'start') {
-      browser.action.setBadgeText({text: 'start'});
-      browser.action.setBadgeBackgroundColor({color: '#999900'});
-    } else if (whStatus.label === 'complete') {
-      var now = new Date();
-      var username =
-        whData.cannergrow &&
-        Object.keys(whData.cannergrow).length > 0 &&
-        Object.keys(whData.cannergrow)[0];
-      var data = whData?.cannergrow[username];
-      if (now.getTime() - data?.timestamp > 1000*60*60) {
-        browser.action.setBadgeBackgroundColor({color: '#880000'});
-        browser.action.setBadgeText({text: '100%'});
-      } else {
-        browser.action.setBadgeText({text: '100%'});
-      }
-
-    } else if (whStatus.label === 'error') {
-      browser.action.setBadgeText({text: 'Err'});
-      browser.action.setBadgeBackgroundColor({color: '#aa0000'});
-    } else if (whStatus.label === 'idle'){
-      browser.action.setBadgeText({text: ''});
-    } else {
-      browser.action.setBadgeText({text: whStatus.label});
-    }
-  } else {
-    browser.action.setBadgeText({text: ''});
-  }
-}
-
-browser.storage.onChanged.addListener(async function (changes, area) {
-  updateView()
-});
-
-
-updateView()
-
 
 function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
@@ -99,37 +41,53 @@ function addTimestamp(data) {
   data.date = dateToSave;
 }
 
-async function isCancelled() {
-  var { whStatus } = await browser.storage.local.get("whStatus");
-  if (whStatus) {
-    if (whStatus.label === 'inprogress') {
-       return false
-    } 
-  } 
+/* 
 
-  return true
-}
+  ------------------------------------------------------------------------------------------ STATE OF SERVICE WORKER ------------------------------------------------------------------------------------------
 
-async function isLoggedIn() {
-  var { whSession } = await browser.storage.local.get("whSession");
-  return whSession?.cannergrow?.loggedin
-}
+*/
 
-async function contentFetchData() {
-  if (!(await isLoggedIn())) {
-    console.log('contentFetchData: not logged in')
-    return
+var whSession = {
+  isRunning: false,
+  shouldCancel: false,
+  loggedin: false,
+  username: "",
+  token: "",
+};
+
+function isCancelled() {
+  if (whSession.shouldCancel) {
+    return true;
   }
 
-  console.log("werteherren fetch data");
+  if (!whSession.isRunning) {
+    return true;
+  }
 
-  var { whSession } = await browser.storage.local.get('whSession')
-  var username = whSession?.cannergrow?.username
-  var token = whSession?.cannergrow?.token
+  if (!isLoggedIn()) {
+    return true;
+  }
 
-  if (!username || !token) {
-    console.log('something isnt right')
-    throw new Error('something is not right with username or token')
+  return true;
+}
+
+function isLoggedIn() {
+  return whSession.loggedin;
+}
+
+function getUsername() {
+  return whSession.username;
+}
+
+function getToken() {
+  return whSession.token;
+}
+
+async function getDataForCurrentUser() {
+  var username = getUsername();
+  console.log("cant getDataForCurrentUser, no username");
+  if (!username) {
+    return null;
   }
 
   var { localData } = await browser.storage.local.get("whData");
@@ -138,173 +96,327 @@ async function contentFetchData() {
     localData.cannergrow[username] = {};
     localData.cannergrow[username].username = username;
     localData.cannergrow[username].version = "1";
+    localData.cannergrow[username].isComplete = false;
   }
 
-  var listOptions = {lengthCheck: true}
-  var d = localData.cannergrow[username]
-  browser.storage.local.set({whStatus: {label: 'inprogress', percentage: 0.0 }})
+  return localData.cannergrow[username];
+}
 
-  await fetchListOfResources('https://api.cannergrow.com/api/wallet/transactions?page=', 'transactions', 'data', 'label', 0, localData, username, token, 0.1, listOptions)
-  await fetchListOfResources('https://api.cannergrow.com/api/growing/plants?page=', 'plants', 'data', 'label', 0, localData, username, token, 0.2, listOptions)
-  await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=1&page=', 'layer1', 'data', 'id', 0, localData, username, token, 0.3, listOptions)
-  for (var i=1;i<7;i++) {
-    d['layer' + i]?.data && d['layer' + i]?.data.length > 0 && await fetchListOfResources('https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer='+(i+1)+'&page=', 'layer'+(i+1), 'data', 'id', 0, localData, username, token, 0.3 + i*0.1, listOptions)
+async function saveDataForCurrentUser(d) {
+  var username = getUsername();
+  if (!username) {
+    console.log("cant saveData, no username");
+    return null;
   }
-  await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team', 0, localData, username, token, 0.95)
-
-  if (await isCancelled()) {
-    return
-  }
-  
-  addTimestamp(d);
-  console.log("saving", localData);
+  var { localData } = await browser.storage.local.get("whData");
+  localData.cannergrow[username] = d;
   browser.storage.local.set({ whData: localData }).then(() => {
-    console.log('saved successfull');
+    console.log("saved successfull");
   });
-  browser.runtime.sendMessage({action: 'setBadgeText', text: (100 + ' %') || ''})
-  browser.storage.local.set({ whStatus: {label: 'complete', percentage: 1.0 }})
+}
+
+async function getStatusForCurrentUser() {
+  /* , options.basePercentage + (d[name].data.length / responseJson.meta.total) * 0.1 */
+
+  var whStatus = {
+    isComplete: false,
+    percentage: 0,
+    message: "",
+    shouldCancel: whSession.shouldCancel,
+    isRunning: whSession.isRunning,
+  };
+  var data = await getDataForCurrentUser();
+  if (data) {
+    if (data.team) {
+      whStatus.percentage = 1.0;
+      whStatus.message = "complete";
+      whStatus.isComplete = true;
+    } else if (!data.transactions) {
+      whStatus.percentage = 0.0;
+      whStatus.message = "transactions";
+    } else if (!data.plants) {
+      whStatus.percentage = 0.1;
+      whStatus.message = "plants";
+    } else {
+      for (var i = 1; i < 7; i++) {
+        if (!data["layer" + i]) {
+          whStatus.percentage = 0.1 + 0.1 * i;
+          whStatus.message = "layer" + i;
+          break;
+        }
+      }
+    }
+  } else {
+    whStatus.percentage = 0
+    whStatus.message = "?";
+    whStatus.isComplete = false;
+  }
+  
+
+  return whStatus;
+}
+
+/* 
+
+  ------------------------------------------------------------------------------------------ BADGE SECTION ------------------------------------------------------------------------------------------
+
+*/
+
+async function updateView() {
+  var { whData } = await browser.storage.local.get("whData");
+  var whStatus = await getStatusForCurrentUser();
+  var data = await getDataForCurrentUser();
+
+  // 0 - 100% black if username is known and it is fetching currently
+  // '' if nothing is fetching and nothing was fetched before
+  // 100% green if all entries are complete and up2date and nothing is fetching currently
+  // 100% yellow if all entries are complete, but not up2date and nothing is fetching currently
+  // ? red if username not known and not all entries are complete
+
+  if (whStatus?.isRunning) {
+    browser.action.setBadgeText({
+      text:
+        (whStatus.percentage && parseInt(whStatus.percentage * 100) + " %") ||
+        "",
+    });
+    browser.action.setBadgeBackgroundColor({ color: "#000000" });
+  } else if (!whData?.cannergrow) {
+    browser.action.setBadgeText({ text: "" });
+  } else if (whData?.cannergrow) {
+    var countTotal = Object.keys(whData.cannergrow).length;
+    var countTotalComplete = 0;
+    var oldestTimestamp = null;
+    for (var i = 0; i < countTotal; i++) {
+      var entry = whData.cannergrow[Object.keys(whData.cannergrow)[i]];
+      countTotalComplete += entry.isComplete ? 1 : 0;
+      if (i === 0 || oldestTimestamp > entry.timestamp) {
+        oldestTimestamp = entry.timestamp;
+      }
+    }
+
+    if (countTotal === 0) {
+      browser.action.setBadgeText({ text: "" });
+    } else if (countTotal === countTotalComplete) {
+      browser.action.setBadgeText({ text: "100%" });
+
+      if (now.getTime() - oldestTimestamp > 1000 * 60 * 60) {
+        browser.action.setBadgeBackgroundColor({ color: "#88ff00" });
+      } else {
+        browser.action.setBadgeBackgroundColor({ color: "#00ff00" });
+      }
+    } else {
+      browser.action.setBadgeBackgroundColor({ color: "#880000" });
+      browser.action.setBadgeText({ text: "?" });
+    }
+  } else {
+    browser.action.setBadgeBackgroundColor({ color: "#880000" });
+    browser.action.setBadgeText({ text: "!" });
+  }
 
 }
 
+/* 
 
-async function fetchListOfResources(url, name, responseKey, matchKey, index, localData, username, token, percentage, options) {
+  ------------------------------------------------------------------------------------------ BADGE SECTION ------------------------------------------------------------------------------------------
 
-  if (await isCancelled() || (!await isLoggedIn())) {
-    return
+*/
+
+async function fetchData() {
+  if (isCancelled()) {
+    return;
   }
 
-  var d = localData.cannergrow[username]
-  if (d[name] && d[name].total > 0 && d[name].data && d[name].data.length === d[name].total) {
-    return
+  console.log("werteherren fetch data");
+
+  var optionsFast = { lengthCheck: true };
+  var d = await getDataForCurrentUser();
+  d.isComplete = false;
+  saveDataForCurrentUser(d);
+
+  await fetchListOfResources(
+    "https://api.cannergrow.com/api/wallet/transactions?page=",
+    "transactions",
+    "data",
+    "label",
+    0,
+    optionsFast
+  );
+  await fetchListOfResources(
+    "https://api.cannergrow.com/api/growing/plants?page=",
+    "plants",
+    "data",
+    "label",
+    0
+  );
+  for (var i = 0; i < 7; i++) {
+    (i === 0 || (d["layer" + i]?.data && d["layer" + i]?.data.length > 0)) &&
+      (await fetchListOfResources(
+        "https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=" +
+          (i + 1) +
+          "&page=",
+        "layer" + (i + 1),
+        "data",
+        "id",
+        0
+      ));
+  }
+  await fetchSingleResource("https://api.cannergrow.com/api/user/team", "team");
+
+  if (isCancelled()) {
+    return;
   }
 
-  browser.storage.local.set({whStatus: {label: 'inprogress', message: name, percentage: percentage }})
-
-  let promise = new Promise((resolve, reject) => {
-
-    sleep(1000).then(() => {
-      console.log('fetchRs', url+ index, name, responseKey, matchKey, index, localData, username, token, options)
-
-        fetch(url + index, {
-          headers: new Headers({ Authorization: "Bearer " + token }),
-        }).then((response) => {
-          response.text().then(async (text) => {
-            var responseJson = JSON.parse(text); // data, links, meta, types
-            var d = localData.cannergrow[username]
-            if (!d[name]) {
-              d[name] = {
-                total: 0,
-                data: []
-              }
-            }
-
-            if (responseJson[responseKey].length > 0) {
-    
-              responseJson[responseKey].forEach((tx) => {
-                  if (!d[name].data.find((x) => x[matchKey] === tx[matchKey])
-                  ) {
-                    d[name].data.push(tx);
-                  }
-              });
-
-            }
-      
-            d[name].total = responseJson.meta.total;
-      
-            if (await isCancelled() || (!await isLoggedIn())) {
-              resolve(null)
-              return
-            }
-
-            console.log("saving", localData);
-            browser.storage.local.set({ whData: localData }).then(() => {
-              console.log('saved successfull');
-            });
-
-            if (
-              (options && options.lengthCheck && d[name].data.length === responseJson.meta.total) ||
-              responseJson.data.length === 0
-            ) {
-              console.log('done extracting ' + name);
-              delete options.basePercentage
-              resolve(localData)
-      
-            } else {
-              sleep(500).then(async () => {
-                if (!options.basePercentage) {
-                  options.basePercentage = percentage
-                }
-                await fetchListOfResources(url, name, responseKey, matchKey, index + 1, localData, username, token, options.basePercentage + (d[name].data.length / responseJson.meta.total) * 0.1, options);
-                resolve(localData)
-              });
-            }
-          })
-        })
-    })
-
-
-    
-  })
-  
-  return promise;
+  var d = await getDataForCurrentUser();
+  d.isComplete = true;
+  addTimestamp(d);
+  saveDataForCurrentUser(d);
 }
 
-async function fetchSingleResource(url, name, index, localData, username, token, percentage) {
+/* 
 
-  if (await isCancelled()) {
-    return
+  ------------------------------------------------------------------------------------------ EXTRACT SECTION ------------------------------------------------------------------------------------------
+
+*/
+
+async function fetchListOfResources(
+  url,
+  name,
+  responseKey,
+  matchKey,
+  index,
+  options
+) {
+  if (isCancelled()) {
+    return;
   }
-  
-  var d = localData.cannergrow[username]
-  if (d[name]) {
-    return
-  }
-
-
-  browser.storage.local.set({whStatus: {label: 'inprogress', message: name, percentage: percentage  }})
 
   let promise = new Promise((resolve, reject) => {
+    sleep(500).then(() => {
+      console.log("fetchRs", url + index);
 
-    sleep(1000).then(() => {
-      console.log('fetchTeam', index, localData, username, token)
-      fetch(url, {
-        headers: new Headers({ Authorization: "Bearer " + token }),
+      fetch(url + index, {
+        headers: new Headers({ Authorization: "Bearer " + getToken() }),
       }).then((response) => {
         response.text().then(async (text) => {
-          var responseJson = JSON.parse(text);
-          d[name] = responseJson;
-          if (await isCancelled() || (!await isLoggedIn())) {
-            resolve(null)
-            return
+          var responseJson = JSON.parse(text); // data, links, meta, types
+          var d = await getDataForCurrentUser();
+          if (!d[name]) {
+            d[name] = {
+              total: 0,
+              data: [],
+            };
           }
-          console.log('saving ' + name, localData);
-          browser.storage.local.set({ whData: localData }).then(() => {
-            console.log('saved ' + name);
-          });
- 
-          resolve(localData)
-        })
-      })
-    })
-  })  
+
+          if (!isCancelled()) {
+            if (responseJson[responseKey].length > 0) {
+              responseJson[responseKey].forEach((tx) => {
+                if (!d[name].data.find((x) => x[matchKey] === tx[matchKey])) {
+                  d[name].data.push(tx);
+                }
+              });
+            }
+            d[name].total = responseJson.meta.total;
+            saveDataForCurrentUser(d);
+
+            if (
+              (options &&
+                options.lengthCheck &&
+                d[name].data.length === responseJson.meta.total) ||
+              responseJson.data.length === 0
+            ) {
+              // we are complete, nothing more to do
+            } else {
+              await fetchListOfResources(
+                url,
+                name,
+                responseKey,
+                matchKey,
+                index + 1,
+                options
+              );
+            }
+
+            resolve(d);
+          }
+        });
+      });
+    });
+  });
+
   return promise;
 }
 
-async function updateData() {
-  var { whStatus } = await browser.storage.local.get('whStatus');
-  if (whStatus) {
-    if (whStatus.label === 'start' || whStatus.label === 'inprogress') {
-       contentFetchData()
-    } 
-  } 
+async function fetchSingleResource(url, name) {
+  if (isCancelled()) {
+    return;
+  }
+
+  await sleep(500);
+  console.log("fetchRs", url);
+
+  return fetch(url, {
+    headers: new Headers({ Authorization: "Bearer " + getToken() }),
+  }).then((response) => {
+    response.text().then(async (text) => {
+      var responseJson = JSON.parse(text);
+      if (!isCancelled()) {
+        var d = await getDataForCurrentUser();
+        d[name] = responseJson;
+        saveDataForCurrentUser(d);
+      }
+
+      return d;
+    });
+  });
 }
 
+/* 
 
-browser.storage.onChanged.addListener(function (changes, area) {
-  if (changes?.whStatus?.newValue?.label === 'start') {
-    contentFetchData()
+  ------------------------------------------------------------------------------------------ LISTENER ------------------------------------------------------------------------------------------
+
+*/
+
+browser.storage.onChanged.addListener(async function (changes, area) {
+  console.log("werteherren service worker badge listener", changes, area);
+  updateView();
+});
+
+browser.runtime.onMessage.addListener(async (message) => {
+  console.log("werteherren service worker message listener", message);
+
+  if (message.action === "extract") {
+    if (!whSession.isRunning) {
+      try {
+        (whSession.username = username),
+          (whSession.token = token),
+          (whSession.loggedin = loggedin);
+        whSession.isRunning = true;
+        await fetchData();
+      } catch (ex) {
+        console.log("background extract exception", ex);
+      } finally {
+        isRunning = false;
+        shouldCancel = false;
+      }
+    } else {
+      console.log("already running");
+    }
+  } else if (message.action === "abort") {
+    shouldCancel = true;
+  } else if (message.action === "deleteAll") {
+    await browser.storage.local.remove(["whData"]);
+  } else if (message.action === "getStatus") {
+    response = { status: await getStatusForCurrentUser() };
   }
 });
 
+browser.runtime.onInstalled.addListener(() => {
+  console.log("werteherren service worker onInstalled");
+});
 
-updateData()
+browser.runtime.onSuspend.addListener(() => {
+  console.log("werteherren service worker onSuspend");
+});
+
+console.log("werteherren service worker init");
+updateView();

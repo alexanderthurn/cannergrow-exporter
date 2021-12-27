@@ -1,19 +1,39 @@
-console.log("werteherren content script");
+console.log('werteherren content script');
 
+function geTokenAndUsername() {
+  var token = JSON.parse(localStorage.getItem('vuex'))?.token?.access_token;
+  var loggedin = token ? true : false
+  var username =
+    token &&
+    document
+      ?.getElementsByClassName('user-block-name')[0]
+      ?.innerText?.split(',')[1]
+      .trim();
 
-async function extractData() {
-  var token = JSON.parse(localStorage.getItem("vuex"))?.token?.access_token;
-  var username = token && document.getElementsByClassName("user-block-name")[0].innerText.split(",")[1].trim();
-  browser.storage.local.set({whSession: {cannergrow: {loggedin: token ? true : false, token: token, username: username }}})
-  console.log('session extracted', token, {whSession: {cannergrow: {loggedin: token ? true : false, token: token, username: username }}})
+  return {loggedin: loggedin, token: token, username: username};
 }
 
-window.onload = async function () {
- extractData()
-}
+// data should be injected
+browser.runtime.onMessage.addListener(async (message) => {
+  console.log('message', message)
 
+  var response = { unknown: true}
+  var session = geTokenAndUsername()
+  var username = session.username
+  var token = session.token
+  var loggedin = session.loggedin
 
-browser.storage.onChanged.addListener(function (changes, area) {
-  console.log('changes', changes, area)
-  //updateData()
+  if (message.action === 'extract') {
+    if (token && username && loggedin) {
+      browser.runtime.sendMessage({ action: 'extract', username: username, token: token, loggedin: loggedin });
+      response = {ok: true}
+    } else {
+      response = {ok: false, token: token, username: username, loggedin: loggedin}
+    }
+  } else if (message.action === 'canExtract') {
+    response = {ok: token && username && loggedin}
+  }
+
+  console.log('response', response)
+  return Promise.resolve(response)
 });

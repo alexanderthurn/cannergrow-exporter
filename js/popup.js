@@ -85,33 +85,40 @@ console.log('popup');
   }
 
   async function deleteData() {
-    await browser.storage.local.remove(['whData']);
-  }
-
-  async function extractData() {
-    await deleteData()
-    browser.storage.local.set({ whStatus: {label: 'start', percentage: 0.0  }})
+    await browser.runtime.sendMessage({action: 'deleteAll'});
   }
 
   async function abortExtraction() {
-    await deleteData()
-    browser.storage.local.set({ whStatus: {label: 'idle', percentage: 0.0  }})
+    await browser.runtime.sendMessage({action: 'abort'});
   }
   
+  async function extractData() {
+    console.log('extractData')
+    await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'extract' }).then((response) => {
+      console.log('extractData response', response)
+      return response.ok
+      }).catch((ex) => {
+        console.log('extractData ex', ex)
+        canExtract = false
+      })
+  }
 
+  async function canExtract() {
+    var canExtract = await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'canExtract' }).then((response) => {
+      console.log('canExtract response', response)
+      return response.ok
+      }).catch((ex) => {
+        console.log('canExtract ex', ex)
+        canExtract = false
+      })
+
+
+    console.log('canExtract', canExtract)
+    return canExtract
+  }
 
   async function injectData() {
-    var tab = await getCurrentTab();
-
-    return browser.tabs
-      .sendMessage(tab.id, { action: 'inject' })
-      .then((response) => {
-        console.log('Message from the content script:');
-        console.log(response);
-      })
-      .catch((onError) => {
-        console.log('error', onError);
-      });
+    await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'inject' })
   }
 
   async function downloadData() {
@@ -176,15 +183,13 @@ console.log('popup');
     showElement('whLoader', whStatus?.label === 'inprogress');
     showElement('whPluginContent', whStatus?.label !== 'inprogress');
     showElement('whPluginResult', whStatus?.label === 'complete');
-    showElement('whPluginTutorial', !loggedIn || whStatus?.label !== 'complete')
-    showElement('whLoggedIn', loggedIn);
-    showElement('whPluginActionsCannergrow', loggedIn && tab.url.indexOf('backend.cannergrow.com') >= 0);
-    showElement('whCorrectPage', tab.url.indexOf('backend.cannergrow.com') >= 0);
-    showElement('whPluginActionsWerteherren', tab.url.indexOf('werteherren.de') > -1);
+    showElement('whPluginTutorial', !loggedIn)
+    showElement('whPluginActionsCannergrow', await canExtract());
+    showElement('whPluginActionsWerteherren', tab?.url?.indexOf('werteherren.de') > -1);
 
   }
 
-  window.onload = function () {
+  window.onload = async function () {
     console.log('werteherren popup script');
     document.getElementById('btnDeleteData').onclick = deleteData;
     document.getElementById('btnDownloadData').onclick = downloadData;
@@ -195,7 +200,8 @@ console.log('popup');
     document.getElementById('btnInjectData').onclick = injectData;
     document.getElementById('btnSyncData').onclick = extractData;
     document.getElementById('btnAbortSync').onclick = abortExtraction
-    updateView();
+
+    await updateView();
 
     browser.storage.onChanged.addListener(function (changes, area) {
       console.log('change received!');
