@@ -27,15 +27,15 @@ function addTimestamp(data) {
   var seconds = now.getSeconds();
   var dateToSave =
     year +
-    "-" +
+    '-' +
     month +
-    "-" +
+    '-' +
     day +
-    " " +
+    ' ' +
     hours +
-    ":" +
+    ':' +
     minutes +
-    ":" +
+    ':' +
     seconds;
   data.timestamp = now.getTime();
   data.date = dateToSave;
@@ -51,8 +51,8 @@ var whSession = {
   isRunning: false,
   shouldCancel: false,
   loggedin: false,
-  username: "",
-  token: "",
+  username: '',
+  token: '',
 };
 
 function isCancelled() {
@@ -68,7 +68,7 @@ function isCancelled() {
     return true;
   }
 
-  return true;
+  return false;
 }
 
 function isLoggedIn() {
@@ -85,34 +85,41 @@ function getToken() {
 
 async function getDataForCurrentUser() {
   var username = getUsername();
-  console.log("cant getDataForCurrentUser, no username");
   if (!username) {
+    console.log('cant getDataForCurrentUser, no username');
     return null;
   }
 
-  var { localData } = await browser.storage.local.get("whData");
-  if (!localData) {
-    localData = { cannergrow: {} };
-    localData.cannergrow[username] = {};
-    localData.cannergrow[username].username = username;
-    localData.cannergrow[username].version = "1";
-    localData.cannergrow[username].isComplete = false;
+  var { whData } = await browser.storage.local.get('whData');
+  if (!whData?.cannergrow) {
+    whData = { cannergrow: {} };
   }
 
-  return localData.cannergrow[username];
+  if (!whData.cannergrow[username]) {
+    whData.cannergrow[username] = {};
+    whData.cannergrow[username].username = username;
+    whData.cannergrow[username].version = '1';
+    whData.cannergrow[username].isComplete = false;
+  }
+
+  return whData.cannergrow[username];
 }
 
 async function saveDataForCurrentUser(d) {
   var username = getUsername();
   if (!username) {
-    console.log("cant saveData, no username");
+    console.log('cant saveData, no username');
     return null;
   }
-  var { localData } = await browser.storage.local.get("whData");
-  localData.cannergrow[username] = d;
-  browser.storage.local.set({ whData: localData }).then(() => {
-    console.log("saved successfull");
+  var { whData } = await browser.storage.local.get('whData');
+  if (!whData?.cannergrow) {
+    whData = { cannergrow: {} };
+  }
+  whData.cannergrow[username] = d;
+  await browser.storage.local.set({ whData: whData }).then(() => {
+    console.log('saved successfull', whData);
   });
+
 }
 
 async function getStatusForCurrentUser() {
@@ -121,7 +128,7 @@ async function getStatusForCurrentUser() {
   var whStatus = {
     isComplete: false,
     percentage: 0,
-    message: "",
+    message: '',
     shouldCancel: whSession.shouldCancel,
     isRunning: whSession.isRunning,
   };
@@ -129,26 +136,26 @@ async function getStatusForCurrentUser() {
   if (data) {
     if (data.team) {
       whStatus.percentage = 1.0;
-      whStatus.message = "complete";
+      whStatus.message = 'complete';
       whStatus.isComplete = true;
     } else if (!data.transactions) {
       whStatus.percentage = 0.0;
-      whStatus.message = "transactions";
+      whStatus.message = 'transactions';
     } else if (!data.plants) {
       whStatus.percentage = 0.1;
-      whStatus.message = "plants";
+      whStatus.message = 'plants';
     } else {
       for (var i = 1; i < 7; i++) {
-        if (!data["layer" + i]) {
+        if (!data['layer' + i]) {
           whStatus.percentage = 0.1 + 0.1 * i;
-          whStatus.message = "layer" + i;
+          whStatus.message = 'layer' + i;
           break;
         }
       }
     }
   } else {
     whStatus.percentage = 0
-    whStatus.message = "?";
+    whStatus.message = '?';
     whStatus.isComplete = false;
   }
   
@@ -163,9 +170,9 @@ async function getStatusForCurrentUser() {
 */
 
 async function updateView() {
-  var { whData } = await browser.storage.local.get("whData");
+  console.log('updateView')
+  var { whData } = await browser.storage.local.get('whData');
   var whStatus = await getStatusForCurrentUser();
-  var data = await getDataForCurrentUser();
 
   // 0 - 100% black if username is known and it is fetching currently
   // '' if nothing is fetching and nothing was fetched before
@@ -176,12 +183,12 @@ async function updateView() {
   if (whStatus?.isRunning) {
     browser.action.setBadgeText({
       text:
-        (whStatus.percentage && parseInt(whStatus.percentage * 100) + " %") ||
-        "",
+        (whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %') ||
+        '',
     });
-    browser.action.setBadgeBackgroundColor({ color: "#000000" });
+    browser.action.setBadgeBackgroundColor({ color: '#000000' });
   } else if (!whData?.cannergrow) {
-    browser.action.setBadgeText({ text: "" });
+    browser.action.setBadgeText({ text: '' });
   } else if (whData?.cannergrow) {
     var countTotal = Object.keys(whData.cannergrow).length;
     var countTotalComplete = 0;
@@ -195,22 +202,27 @@ async function updateView() {
     }
 
     if (countTotal === 0) {
-      browser.action.setBadgeText({ text: "" });
+      browser.action.setBadgeText({ text: '' });
     } else if (countTotal === countTotalComplete) {
-      browser.action.setBadgeText({ text: "100%" });
+      browser.action.setBadgeText({ text: '100%' });
+      var now = new Date();
 
       if (now.getTime() - oldestTimestamp > 1000 * 60 * 60) {
-        browser.action.setBadgeBackgroundColor({ color: "#88ff00" });
+        browser.action.setBadgeBackgroundColor({ color: '#88ff00' });
       } else {
-        browser.action.setBadgeBackgroundColor({ color: "#00ff00" });
+        browser.action.setBadgeBackgroundColor({ color: '#007700' });
       }
     } else {
-      browser.action.setBadgeBackgroundColor({ color: "#880000" });
-      browser.action.setBadgeText({ text: "?" });
+      browser.action.setBadgeBackgroundColor({ color: '#880000' });
+      browser.action.setBadgeText({
+        text:
+          (whStatus?.percentage && parseInt(whStatus?.percentage * 100) + ' %') ||
+          '?',
+      });
     }
   } else {
-    browser.action.setBadgeBackgroundColor({ color: "#880000" });
-    browser.action.setBadgeText({ text: "!" });
+    browser.action.setBadgeBackgroundColor({ color: '#880000' });
+    browser.action.setBadgeText({ text: '!' });
   }
 
 }
@@ -226,50 +238,55 @@ async function fetchData() {
     return;
   }
 
-  console.log("werteherren fetch data");
+  console.log('werteherren fetch data');
 
   var optionsFast = { lengthCheck: true };
   var d = await getDataForCurrentUser();
   d.isComplete = false;
-  saveDataForCurrentUser(d);
+  await saveDataForCurrentUser(d);
 
+  /*
   await fetchListOfResources(
-    "https://api.cannergrow.com/api/wallet/transactions?page=",
-    "transactions",
-    "data",
-    "label",
+    'https://api.cannergrow.com/api/wallet/transactions?page=',
+    'transactions',
+    'data',
+    'label',
     0,
     optionsFast
   );
   await fetchListOfResources(
-    "https://api.cannergrow.com/api/growing/plants?page=",
-    "plants",
-    "data",
-    "label",
+    'https://api.cannergrow.com/api/growing/plants?page=',
+    'plants',
+    'data',
+    'label',
     0
   );
   for (var i = 0; i < 7; i++) {
-    (i === 0 || (d["layer" + i]?.data && d["layer" + i]?.data.length > 0)) &&
+    (i === 0 || (d['layer' + i]?.data && d['layer' + i]?.data.length > 0)) &&
       (await fetchListOfResources(
-        "https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=" +
+        'https://api.cannergrow.com/api/user/team/members?order_by=team_size&layer=' +
           (i + 1) +
-          "&page=",
-        "layer" + (i + 1),
-        "data",
-        "id",
+          '&page=',
+        'layer' + (i + 1),
+        'data',
+        'id',
         0
       ));
   }
-  await fetchSingleResource("https://api.cannergrow.com/api/user/team", "team");
+  */
+  await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team');
 
+  console.log('done fetching')
   if (isCancelled()) {
     return;
   }
+  console.log('finalising')
 
   var d = await getDataForCurrentUser();
   d.isComplete = true;
   addTimestamp(d);
-  saveDataForCurrentUser(d);
+  await saveDataForCurrentUser(d);
+  console.log('finalising complete')
 }
 
 /* 
@@ -290,60 +307,51 @@ async function fetchListOfResources(
     return;
   }
 
-  let promise = new Promise((resolve, reject) => {
-    sleep(500).then(() => {
-      console.log("fetchRs", url + index);
 
-      fetch(url + index, {
-        headers: new Headers({ Authorization: "Bearer " + getToken() }),
-      }).then((response) => {
-        response.text().then(async (text) => {
-          var responseJson = JSON.parse(text); // data, links, meta, types
-          var d = await getDataForCurrentUser();
-          if (!d[name]) {
-            d[name] = {
-              total: 0,
-              data: [],
-            };
-          }
+  await sleep(500)
+  console.log('fetchRs', url + index);
+  var response = await fetch(url + index, { headers: new Headers({ Authorization: 'Bearer ' + getToken() })})
+  var text = await response.text()
+  var responseJson = JSON.parse(text);
 
-          if (!isCancelled()) {
-            if (responseJson[responseKey].length > 0) {
-              responseJson[responseKey].forEach((tx) => {
-                if (!d[name].data.find((x) => x[matchKey] === tx[matchKey])) {
-                  d[name].data.push(tx);
-                }
-              });
-            }
-            d[name].total = responseJson.meta.total;
-            saveDataForCurrentUser(d);
+  var d = await getDataForCurrentUser();
+  if (!d[name]) {
+    d[name] = {
+      total: 0,
+      data: [],
+    };
+  }
 
-            if (
-              (options &&
-                options.lengthCheck &&
-                d[name].data.length === responseJson.meta.total) ||
-              responseJson.data.length === 0
-            ) {
-              // we are complete, nothing more to do
-            } else {
-              await fetchListOfResources(
-                url,
-                name,
-                responseKey,
-                matchKey,
-                index + 1,
-                options
-              );
-            }
-
-            resolve(d);
-          }
-        });
+  if (!isCancelled()) {
+    if (responseJson[responseKey].length > 0) {
+      responseJson[responseKey].forEach((tx) => {
+        if (!d[name].data.find((x) => x[matchKey] === tx[matchKey])) {
+          d[name].data.push(tx);
+        }
       });
-    });
-  });
+    }
+    d[name].total = responseJson.meta.total;
+    await saveDataForCurrentUser(d);
 
-  return promise;
+    if (
+      (options &&
+        options.lengthCheck &&
+        d[name].data.length === responseJson.meta.total) ||
+      responseJson.data.length === 0
+    ) {
+      // we are complete, nothing more to do
+    } else {
+      await fetchListOfResources(
+        url,
+        name,
+        responseKey,
+        matchKey,
+        index + 1,
+        options
+      );
+    }
+  }
+      
 }
 
 async function fetchSingleResource(url, name) {
@@ -352,22 +360,18 @@ async function fetchSingleResource(url, name) {
   }
 
   await sleep(500);
-  console.log("fetchRs", url);
+  console.log('fetchRs', url);
 
-  return fetch(url, {
-    headers: new Headers({ Authorization: "Bearer " + getToken() }),
-  }).then((response) => {
-    response.text().then(async (text) => {
-      var responseJson = JSON.parse(text);
-      if (!isCancelled()) {
-        var d = await getDataForCurrentUser();
-        d[name] = responseJson;
-        saveDataForCurrentUser(d);
-      }
+  var response = await fetch(url, {headers: new Headers({ Authorization: 'Bearer ' + getToken() })});
+  var text = await response.text()
+  var responseJson = JSON.parse(text);
 
-      return d;
-    });
-  });
+  if (!isCancelled()) {
+    var d = await getDataForCurrentUser();
+    d[name] = responseJson;
+    await saveDataForCurrentUser(d);
+  }
+
 }
 
 /* 
@@ -377,46 +381,51 @@ async function fetchSingleResource(url, name) {
 */
 
 browser.storage.onChanged.addListener(async function (changes, area) {
-  console.log("werteherren service worker badge listener", changes, area);
+  console.log('werteherren service worker badge listener', changes, area);
   updateView();
 });
 
 browser.runtime.onMessage.addListener(async (message) => {
-  console.log("werteherren service worker message listener", message);
+  console.log('werteherren service worker message listener', message);
 
-  if (message.action === "extract") {
+  if (message.action === 'setSession') {
+    whSession.username = message.username
+    whSession.token = message.token
+    whSession.loggedin = message.loggedin
+    updateView();
+  } else if (message.action === 'extract') {
     if (!whSession.isRunning) {
       try {
-        (whSession.username = username),
-          (whSession.token = token),
-          (whSession.loggedin = loggedin);
         whSession.isRunning = true;
         await fetchData();
       } catch (ex) {
-        console.log("background extract exception", ex);
+        console.log('background extract exception', ex);
       } finally {
-        isRunning = false;
+        whSession.isRunning = false;
         shouldCancel = false;
       }
     } else {
-      console.log("already running");
+      console.log('already running');
     }
-  } else if (message.action === "abort") {
+  } else if (message.action === 'abort') {
     shouldCancel = true;
-  } else if (message.action === "deleteAll") {
-    await browser.storage.local.remove(["whData"]);
-  } else if (message.action === "getStatus") {
-    response = { status: await getStatusForCurrentUser() };
+  } else if (message.action === 'deleteAll') {
+    await browser.storage.local.remove(['whData']);
+  } else if (message.action === 'getStatus') {
+    return Promise.resolve({ whStatus: await getStatusForCurrentUser() })
+  } else if (message.action === 'canExtract') {
+    return Promise.resolve({ ok: whSession.username && whSession.token && whSession.loggedin  })
   }
+
 });
 
 browser.runtime.onInstalled.addListener(() => {
-  console.log("werteherren service worker onInstalled");
+  console.log('werteherren service worker onInstalled');
 });
 
 browser.runtime.onSuspend.addListener(() => {
-  console.log("werteherren service worker onSuspend");
+  console.log('werteherren service worker onSuspend');
 });
 
-console.log("werteherren service worker init");
+console.log('werteherren service worker init');
 updateView();

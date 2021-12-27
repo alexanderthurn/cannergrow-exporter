@@ -94,27 +94,24 @@ console.log('popup');
   
   async function extractData() {
     console.log('extractData')
-    await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'extract' }).then((response) => {
+    await browser.runtime.sendMessage({ action: 'extract' }).then((response) => {
       console.log('extractData response', response)
-      return response.ok
-      }).catch((ex) => {
-        console.log('extractData ex', ex)
-        canExtract = false
-      })
+    }).catch((ex) => {
+      console.log('extractData ex', ex)
+    })
   }
 
   async function canExtract() {
-    var canExtract = await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'canExtract' }).then((response) => {
+    var canExtractResult = await browser.runtime.sendMessage({ action: 'canExtract' }).then((response) => {
       console.log('canExtract response', response)
       return response.ok
       }).catch((ex) => {
         console.log('canExtract ex', ex)
-        canExtract = false
       })
 
 
-    console.log('canExtract', canExtract)
-    return canExtract
+    console.log('canExtract', canExtractResult)
+    return canExtractResult
   }
 
   async function injectData() {
@@ -133,7 +130,8 @@ console.log('popup');
   async function updateView() {
     var tab = await getCurrentTab();
     console.log('updateView', tab);
-    var { whStatus } = await browser.storage.local.get('whStatus');
+    var {whStatus} = await browser.runtime.sendMessage({action: 'getStatus'})
+    console.log('updateView status', whStatus);
     var { whData } = await browser.storage.local.get('whData');
     var { whSession } = await browser.storage.local.get('whSession');
     var loggedIn = whSession?.cannergrow?.loggedin
@@ -144,8 +142,20 @@ console.log('popup');
         Object.keys(whData.cannergrow).length > 0 &&
         Object.keys(whData.cannergrow)[0];
       var data = whData?.cannergrow[username];
+      var countTotal = 0
+      var countTotalComplete = 0;
+     
 
-      console.log('whData', whData, data)
+      
+      if (whData?.cannergrow) {
+        countTotal= Object.keys(whData?.cannergrow).length;
+        for (var i = 0; i < countTotal; i++) {
+          var entry = whData.cannergrow[Object.keys(whData.cannergrow)[i]];
+          countTotalComplete += entry.isComplete ? 1 : 0;
+        }
+      }
+
+      console.log('whData', whData, data, countTotal, countTotalComplete)
       var members = [];
       var membersTotal = 0;
       for (var i = 1; i < 8; i++) {
@@ -174,15 +184,15 @@ console.log('popup');
         (membersTotal || '0');
     }
 
-    if (whStatus?.label === 'inprogress') {
+    if (whStatus?.isRunning) {
       document.getElementById('whLoaderMessage').innerText = ((whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %' + ' - ') || '') +
         'Loading ' +
         (whStatus.message || '');
     } 
 
-    showElement('whLoader', whStatus?.label === 'inprogress');
-    showElement('whPluginContent', whStatus?.label !== 'inprogress');
-    showElement('whPluginResult', whStatus?.label === 'complete');
+    showElement('whLoader', whStatus?.isRunning);
+    showElement('whPluginContent', !whStatus?.isRunning);
+    showElement('whPluginResult', countTotal > 0 && countTotal == countTotalComplete);
     showElement('whPluginTutorial', !loggedIn)
     showElement('whPluginActionsCannergrow', await canExtract());
     showElement('whPluginActionsWerteherren', tab?.url?.indexOf('werteherren.de') > -1);
