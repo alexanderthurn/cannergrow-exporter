@@ -188,37 +188,37 @@
             }
           }
       
-          resultHTML += '<div id="whPluginResult'+index+'">' +
-          '  <table>' +
-          '    <tr>' +
-          '      <td>Username: </td>' +
-          '      <td><b>'+ username +'</b></td>' +
-          '    </tr>' +
-          '    <tr>' +
-          '      <td>Letzter Sync: </td>' +
-          '      <td>'+((data?.date && niceDate(data.date)) || 'Nie')+'</td>' +
-          '    </tr>' +
-          '    <tr>' +
-          '      <td>Transaktionen:</td>' +
-          '      <td>' + ((data?.transactions?.data?.length || '0') + '/' + (data?.transactions?.total || ''))+'</td>' +
-          '    </tr>' +
-          '    <tr>' +
-          '      <td>Pflanzen:</td>' +
-          '      <td>'+((data?.plants?.data?.length || '0') + '/' + (data?.plants?.total || '0'))+'</td>' +
-          '    </tr>' +
-          '    <tr>' +
-          '      <td>Team:</td>' +
-          '      <td>'+((members?.length || '0') +'/' + (membersTotal || '0'))+'</td>' +
-          '    </tr>' +
-          '  </table>' +
-          '  <div>' +
-          '    <button onclick="console.log(\'hallo\')" id="btnDownloadData'+index+'" type="button">' +
-          '      <i class="fas fa-save"></i> Download</button>' +
-          '    <button id="btnDeleteData'+index+'"  type="button"><i class="fas fa-trash"></i>L&ouml;schen</button>' +
-          '    <button id="btnTaxReport'+index+'" type="button"><i class="fas fa-chart-bar"></i>&nbsp;Steuer-Report<br /></button><br />' +
-          '    <button id="btnReport'+index+'" type="button"><i class="fas fa-chart-line"></i>&nbsp;Rendite-Prognose<br /></button><br />' +
-          '  </div>' +
-          '</div>';
+          resultHTML += `<div id="whPluginResult${index}">
+            <table>
+              <tr>
+                <td>Username: </td>
+                <td><b>${username}</b></td>
+              </tr>
+              <tr>
+                <td>Letzter Sync: </td>
+                <td>${(data?.date && niceDate(data.date) || 'Nie')}</td>
+              </tr>
+              <tr>
+                <td>Transaktionen:</td>
+                <td>${(data?.transactions?.data?.length || '0')}/${(data?.transactions?.total || '')}</td>
+              </tr>
+              <tr>
+                <td>Pflanzen:</td>
+                <td>${(data?.plants?.data?.length || '0')}/${(data?.plants?.total || '0')}</td>
+              </tr>
+              <tr>
+                <td>Team:</td>
+                <td>${(members?.length || '0')}/${(membersTotal || '0')}</td>
+              </tr>
+            </table>
+            <div>
+              <button onclick="console.log(\'hallo\')" id="btnDownloadData${index}" type="button">
+                <i class="fas fa-save"></i> Download</button>
+              <button id="btnDeleteData${index}"  type="button"><i class="fas fa-trash"></i>L&ouml;schen</button>
+              <button id="btnTaxReport${index}" type="button"><i class="fas fa-chart-bar"></i>&nbsp;Steuer-Report<br /></button><br />
+              <button id="btnReport${index}" type="button"><i class="fas fa-chart-line"></i>&nbsp;Rendite-Prognose<br /></button><br />
+            </div>
+          </div>`
         }
       }
 
