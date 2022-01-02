@@ -46,8 +46,8 @@ async function whUpdateView() {
 
   if (whStatus?.isRunning) {
     document.getElementById('whLoaderMessage').innerText = ((whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %' + ' - ') || '') +
-      'Loading ' +
-      (whStatus.message || '');
+      'Extrahiere ' +
+      (whStatus?.message || '');
   } 
 }
 

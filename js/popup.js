@@ -1,5 +1,3 @@
-console.log('popup');
-
 (function () {
   'use strict';
 
@@ -33,16 +31,16 @@ console.log('popup');
     );
   }
 
-  function openReport() {
+  function openReport(username) {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-rendite-rechner-pro.html?inject=wh',
+      'https://dev.werteherren.de/calculator/cannergrow-rendite-rechner-pro.html?inject=wh&username='+username,
       '_blank'
     );
   }
 
-  function openTaxReport() {
+  function openTaxReport(username) {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-steuer-helfer.html?inject=wh',
+      'https://dev.werteherren.de/calculator/cannergrow-steuer-helfer.html?inject=wh&username='+username,
       '_blank'
     );
   }
@@ -80,12 +78,11 @@ console.log('popup');
     var tab = await browser.tabs
       .query({ currentWindow: true, active: true })
       .then((tabs) => tabs[0]);
-    console.log('tab', tab);
     return tab;
   }
 
-  async function deleteData() {
-    await browser.runtime.sendMessage({action: 'deleteAll'});
+  async function deleteData(username) {
+    await browser.runtime.sendMessage({action: 'delete', username: username});
   }
 
   async function abortExtraction() {
@@ -101,7 +98,6 @@ console.log('popup');
       })
 
 
-    console.log('canExtract', canExtractResult)
     return canExtractResult
   }
 
@@ -110,7 +106,6 @@ console.log('popup');
 
     //showElement('whPluginActionsCannergrow', );
     var canExtractResult = await canExtract()
-    console.log('extractData', canExtractResult)
     if (!canExtractResult) {
       openCannergrowBackend()
     } else {
@@ -133,7 +128,6 @@ console.log('popup');
       })
 
 
-    console.log('canInject', canInjectResult)
     return canInjectResult
   }
 
@@ -141,10 +135,11 @@ console.log('popup');
     await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'inject' })
   }
 
-  async function downloadData() {
+  async function downloadData(username) {
+    console.log('download username', username)
     var { whData } = await browser.storage.local.get('whData');
     if (whData !== null) {
-      saveObjectAsFile('cannergrow.json', whData);
+      saveObjectAsFile('cannergrow-'+username+'.json', whData.cannergrow[username]);
     } else {
       console.log('Keine Daten gefunden');
     }
@@ -152,24 +147,15 @@ console.log('popup');
 
   async function updateView() {
     var tab = await getCurrentTab();
-    console.log('updateView', tab);
     var {whStatus} = await browser.runtime.sendMessage({action: 'getStatus'})
-    console.log('updateView status', whStatus);
     var { whData } = await browser.storage.local.get('whData');
     var { whSession } = await browser.storage.local.get('whSession');
     var loggedIn = whSession?.cannergrow?.loggedin
 
     if (whData) {
-      var username =
-        whData.cannergrow &&
-        Object.keys(whData.cannergrow).length > 0 &&
-        Object.keys(whData.cannergrow)[0];
-      var data = whData?.cannergrow[username];
+
       var countTotal = 0
       var countTotalComplete = 0;
-     
-
-      
       if (whData?.cannergrow) {
         countTotal= Object.keys(whData?.cannergrow).length;
         for (var i = 0; i < countTotal; i++) {
@@ -177,39 +163,89 @@ console.log('popup');
           countTotalComplete += entry.isComplete ? 1 : 0;
         }
       }
+      
+     
 
-      console.log('whData', whData, data, countTotal, countTotalComplete)
-      var members = [];
-      var membersTotal = 0;
-      for (var i = 1; i < 8; i++) {
-        var arr = data['layer' + i]?.data;
-        console.log('arr', arr)
-        if (arr) {
-          membersTotal += arr.length;
-          members = members.concat(arr);
+      var resultHTML ='<b>Gefundene Datens&auml;tze</b>'
+
+      for (let index = 0; index < countTotal; index++) {
+
+        let username =
+          whData.cannergrow &&
+          Object.keys(whData.cannergrow).length > 0 &&
+          Object.keys(whData.cannergrow)[index];
+        let data = whData?.cannergrow[username];
+        
+        if (data.isComplete) {
+
+          let members = [];
+          let membersTotal = 0;
+          for (var i = 1; i < 8; i++) {
+            let arr = data['layer' + i]?.data;
+            if (arr) {
+              membersTotal += arr.length;
+              members = members.concat(arr);
+            }
+          }
+      
+          resultHTML += '<div id="whPluginResult'+index+'">' +
+          '  <table>' +
+          '    <tr>' +
+          '      <td>Username: </td>' +
+          '      <td><b>'+ username +'</b></td>' +
+          '    </tr>' +
+          '    <tr>' +
+          '      <td>Letzter Sync: </td>' +
+          '      <td>'+((data?.date && niceDate(data.date)) || 'Nie')+'</td>' +
+          '    </tr>' +
+          '    <tr>' +
+          '      <td>Transaktionen:</td>' +
+          '      <td>' + ((data?.transactions?.data?.length || '0') + '/' + (data?.transactions?.total || ''))+'</td>' +
+          '    </tr>' +
+          '    <tr>' +
+          '      <td>Pflanzen:</td>' +
+          '      <td>'+((data?.plants?.data?.length || '0') + '/' + (data?.plants?.total || '0'))+'</td>' +
+          '    </tr>' +
+          '    <tr>' +
+          '      <td>Team:</td>' +
+          '      <td>'+((members?.length || '0') +'/' + (membersTotal || '0'))+'</td>' +
+          '    </tr>' +
+          '  </table>' +
+          '  <div>' +
+          '    <button onclick="console.log(\'hallo\')" id="btnDownloadData'+index+'" type="button">' +
+          '      <i class="fas fa-save"></i> Download</button>' +
+          '    <button id="btnDeleteData'+index+'"  type="button"><i class="fas fa-trash"></i>L&ouml;schen</button>' +
+          '    <button id="btnTaxReport'+index+'" type="button"><i class="fas fa-chart-bar"></i>&nbsp;Steuer-Report<br /></button><br />' +
+          '    <button id="btnReport'+index+'" type="button"><i class="fas fa-chart-line"></i>&nbsp;Rendite-Prognose<br /></button><br />' +
+          '  </div>' +
+          '</div>';
         }
       }
 
-      document.getElementById('spanUsername').innerHTML = username;
-      document.getElementById('spanLastUpdate').innerHTML =
-        (data?.date && niceDate(data.date)) || 'Nie';
-      document.getElementById('spanTransactionsLength').innerText =
-        (data?.transactions?.data?.length || '0') +
-        '/' +
-        (data?.transactions?.total || '');
-      document.getElementById('spanPlantsLength').innerText =
-        (data?.plants?.data?.length || '0') +
-        '/' +
-        (data?.plants?.total || '0');
-      document.getElementById('spanMembersLength').innerText =
-        (members?.length || '0') +
-        '/' +
-        (membersTotal || '0');
+      
+      document.getElementById('whPluginResult').innerHTML = resultHTML;
+      for (var index = 0; index < countTotal; index++) {
+
+        let username =
+          whData.cannergrow &&
+          Object.keys(whData.cannergrow).length > 0 &&
+          Object.keys(whData.cannergrow)[index];
+        let data = whData?.cannergrow[username];
+        
+        if (data.isComplete) {
+          document.getElementById('btnDownloadData' + index).onclick = () => {downloadData(username)}
+          document.getElementById('btnDeleteData' + index).onclick = () => {deleteData(username)};
+          document.getElementById('btnTaxReport' + index).onclick = () => {openTaxReport(username)};
+          document.getElementById('btnReport' + index).onclick = () => {openReport(username)};
+        }
+      }
+
+
     }
 
     if (whStatus?.isRunning) {
       document.getElementById('whLoaderMessage').innerText = ((whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %' + ' - ') || '') +
-        'Loading ' +
+        'Extrahiere ' +
         (whStatus.message || '');
     } 
 
@@ -220,18 +256,16 @@ console.log('popup');
   }
 
   window.onload = async function () {
+
     console.log('werteherren popup script');
-    document.getElementById('btnDeleteData').onclick = deleteData;
-    document.getElementById('btnDownloadData').onclick = downloadData;
-    document.getElementById('btnReport').onclick = openReport;
-    document.getElementById('btnTaxReport').onclick = openTaxReport;
     document.getElementById('btnSyncData').onclick = extractData;
     document.getElementById('btnAbortSync').onclick = abortExtraction
+
+
 
     await updateView();
 
     browser.storage.onChanged.addListener(function (changes, area) {
-      console.log('change received!');
       updateView();
     });
   };

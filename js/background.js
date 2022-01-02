@@ -278,7 +278,7 @@ async function fetchData() {
       
   }
   
- // await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team');
+  await fetchSingleResource('https://api.cannergrow.com/api/user/team', 'team');
 
   console.log('done fetching')
   if (isCancelled()) {
@@ -385,12 +385,12 @@ async function fetchSingleResource(url, name) {
 */
 
 browser.storage.onChanged.addListener(async function (changes, area) {
-  console.log('werteherren service worker badge listener', changes, area);
+  //console.log('werteherren service worker badge listener', changes, area);
   updateView();
 });
 
 browser.runtime.onMessage.addListener(async (message) => {
-  console.log('werteherren service worker message listener', message);
+  //console.log('werteherren service worker message listener', message);
 
   if (message.action === 'setSession') {
     whSession.username = message.username
@@ -415,6 +415,10 @@ browser.runtime.onMessage.addListener(async (message) => {
     shouldCancel = true;
   } else if (message.action === 'deleteAll') {
     await browser.storage.local.remove(['whData']);
+  } else if (message.action === 'delete') {
+    var { whData } = await browser.storage.local.get('whData');
+    delete whData.cannergrow[message.username]
+    browser.storage.local.set({ whData: whData })
   } else if (message.action === 'getStatus') {
     return Promise.resolve({ whStatus: await getStatusForCurrentUser() })
   } else if (message.action === 'canExtract') {
