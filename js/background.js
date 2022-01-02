@@ -131,7 +131,7 @@ async function getStatusForCurrentUser() {
   };
   var data = await getDataForCurrentUser();
   if (data) {
-    if (data.team) {
+    if (data.team && data.transactions && data.plants) {
       whStatus.percentage = 1.0;
       whStatus.message = 'complete';
       whStatus.isComplete = true;
