@@ -1,6 +1,6 @@
 console.log('werteherren content script');
 
-function geTokenAndUsername() {
+function whGetTokenAndUsername() {
   var token = JSON.parse(localStorage.getItem('vuex'))?.token?.access_token;
   var loggedin = token ? true : false
   var username =
@@ -11,6 +11,44 @@ function geTokenAndUsername() {
       .trim();
 
   return {loggedin: loggedin, token: token, username: username};
+}
+
+async function setSession() {
+  var session = whGetTokenAndUsername()
+  var username = session.username
+  var token = session.token
+  var loggedin = session.loggedin
+  browser.runtime.sendMessage({ action: 'setSession', username: username, token: token, loggedin: loggedin });
+}
+
+async function whUpdateView() {
+  var {whStatus} = await browser.runtime.sendMessage({action: 'getStatus'})
+  
+  console.log('whStatus', whStatus)
+  var elemLoader = document.getElementById('whLoaderOverlay')
+
+  if (whStatus?.isRunning && !elemLoader) {
+    var imageUrl = browser.runtime.getURL('images/werte-herren-logo.svg');
+
+    document.getElementsByTagName('body')[0].innerHTML += "" +
+    '<div id="whLoaderOverlay" class="wh-overlay">'+
+    '  <a href="javascript:void(0)" class="wh-closebtn" onclick="document.getElementById(\'whLoaderOverlay\').style.visibility=\'collapse\'">&times;</a>'+
+    '  <div class="wh-overlay-content">'+
+    '<img src="'+imageUrl+'" class="wh-logo"></img><br /><br />'+
+    '    <h1 class="wh-text" id="whLoaderMessage"></h1>'+
+    '    <h3 class="wh-text">Please wait until finished</h3>'+
+    '  </div>'+
+    '</div>'
+  } else if (!whStatus?.isRunning && elemLoader) {
+    elemLoader.remove();
+  }
+  
+
+  if (whStatus?.isRunning) {
+    document.getElementById('whLoaderMessage').innerText = ((whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %' + ' - ') || '') +
+      'Loading ' +
+      (whStatus.message || '');
+  } 
 }
 
 
@@ -34,32 +72,17 @@ browser.runtime.onMessage.addListener(async (message) => {
   return Promise.resolve(response)
 });
 
-async function setSession() {
-  var session = geTokenAndUsername()
-  var username = session.username
-  var token = session.token
-  var loggedin = session.loggedin
-  browser.runtime.sendMessage({ action: 'setSession', username: username, token: token, loggedin: loggedin });
-}
 
-window.onload = () => {
+
+window.addEventListener('load', (event) => {
   setSession();
 
-  var imageUrl = browser.runtime.getURL('images/werte-herren-logo.svg');
 
-  document.getElementsByTagName('body')[0].innerHTML += "" +
-  '<div id="myNav" class="overlay">'+
-  '<div id="whPluginHeader">'+
-  '<img src="'+imageUrl+'" class="logo"></img>'+
-  '<h1>Cannergrow Exporter</h1>'+
-  '</div>'+
-  '  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>'+
-  '  <div class="overlay-content">'+
-  '    <h1 class="whTitle">Loading</h1>'+
-  '    <h2 class="whTitle">40% - Transactions</h2>'+
-  '    <h3 class="whTitle">Please wait until finished</h3>'+
-  '  </div>'+
-  '</div>'+
-  '<span onclick="openNav()">open</span>'
+ whUpdateView();
+})
 
-}
+
+browser.storage.onChanged.addListener(function (changes, area) {
+  console.log('change received!');
+  whUpdateView();
+});
