@@ -208,9 +208,9 @@ async function updateView() {
       var now = new Date();
 
       if (now.getTime() - oldestTimestamp > 1000 * 60 * 60) {
-        browser.action.setBadgeBackgroundColor({ color: '#88ff00' });
+        browser.action.setBadgeBackgroundColor({ color: '#228800' });
       } else {
-        browser.action.setBadgeBackgroundColor({ color: '#007700' });
+        browser.action.setBadgeBackgroundColor({ color: '#002200' });
       }
     } else {
       browser.action.setBadgeBackgroundColor({ color: '#880000' });

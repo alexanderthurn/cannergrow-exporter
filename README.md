@@ -51,6 +51,8 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 
 ## TODO
 
-* Clean check if we are on the correct page and logged in - Right now checking for /login and /register
-* Clean check if we can inject whData onto this page (e.g. by using content script message)
-* Multi User
+* Check login while surfing cannergrow
+* Better percentage while loading data (layer / length)
+* Add safe check if data needs to be updated
+* Faster data loading for team (parallel?)
+* Better Rendite-Prognose calculator
