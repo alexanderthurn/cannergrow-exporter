@@ -92,15 +92,6 @@ console.log('popup');
     await browser.runtime.sendMessage({action: 'abort'});
   }
   
-  async function extractData() {
-    console.log('extractData')
-    await browser.runtime.sendMessage({ action: 'extract' }).then((response) => {
-      console.log('extractData response', response)
-    }).catch((ex) => {
-      console.log('extractData ex', ex)
-    })
-  }
-
   async function canExtract() {
     var canExtractResult = await browser.runtime.sendMessage({ action: 'canExtract' }).then((response) => {
       console.log('canExtract response', response)
@@ -113,6 +104,25 @@ console.log('popup');
     console.log('canExtract', canExtractResult)
     return canExtractResult
   }
+
+  async function extractData() {
+
+
+    //showElement('whPluginActionsCannergrow', );
+    var canExtractResult = await canExtract()
+    console.log('extractData', canExtractResult)
+    if (!canExtractResult) {
+      openCannergrowBackend()
+    } else {
+      await browser.runtime.sendMessage({ action: 'extract' }).then((response) => {
+        console.log('extractData response', response)
+      }).catch((ex) => {
+        console.log('extractData ex', ex)
+      })
+    }
+  }
+
+  
 
   async function canInject() {
     var canInjectResult =  browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'canInject' }).then((response) => {
@@ -207,9 +217,6 @@ console.log('popup');
     showElement('whPluginContent', !whStatus?.isRunning);
     showElement('whPluginResult', countTotal > 0 && countTotal == countTotalComplete);
     showElement('whPluginTutorial', !loggedIn)
-    showElement('whPluginActionsCannergrow', await canExtract());
-    showElement('whPluginActionsWerteherren', tab?.url?.indexOf('werteherren.de') > -1);
-
   }
 
   window.onload = async function () {
@@ -218,9 +225,6 @@ console.log('popup');
     document.getElementById('btnDownloadData').onclick = downloadData;
     document.getElementById('btnReport').onclick = openReport;
     document.getElementById('btnTaxReport').onclick = openTaxReport;
-    document.getElementById('btnCannergrowBackend').onclick = openCannergrowBackend;
-    
-    document.getElementById('btnInjectData').onclick = injectData;
     document.getElementById('btnSyncData').onclick = extractData;
     document.getElementById('btnAbortSync').onclick = abortExtraction
 
