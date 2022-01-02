@@ -56,3 +56,4 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 * Add safe check if data needs to be updated
 * Faster data loading for team (parallel?)
 * Better Rendite-Prognose calculator
+* Warning Sign: ⚠

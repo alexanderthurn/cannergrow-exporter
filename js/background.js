@@ -390,6 +390,7 @@ browser.runtime.onMessage.addListener(async (message) => {
   //console.log('werteherren service worker message listener', message);
 
   if (message.action === 'setSession') {
+    console.log('background setSession');
     whSession.username = message.username;
     whSession.token = message.token;
     whSession.loggedin = message.loggedin;

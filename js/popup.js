@@ -45,11 +45,9 @@
     );
   }
 
-  function openCannergrowBackend() {
-    window.open(
-      'https://cannergrow.com/r/XJ7QY3',
-      '_blank'
-    );
+  async function openCannergrowBackend() {
+    var tab = await getCurrentTab()
+    browser.tabs.update(tab.id, {url: 'https://backend.cannergrow.com'});
   }
 
   const saveObjectAsFile = (filename, dataObjToWrite) => {
@@ -146,11 +144,9 @@
   }
 
   async function updateView() {
-    var tab = await getCurrentTab();
     var {whStatus} = await browser.runtime.sendMessage({action: 'getStatus'})
     var { whData } = await browser.storage.local.get('whData');
-    var { whSession } = await browser.storage.local.get('whSession');
-    var loggedIn = whSession?.cannergrow?.loggedin
+    var canExtractResult = await canExtract()
 
     if (whData) {
 
@@ -252,7 +248,7 @@
     showElement('whLoader', whStatus?.isRunning);
     showElement('whPluginContent', !whStatus?.isRunning);
     showElement('whPluginResult', countTotal > 0 && countTotal == countTotalComplete);
-    showElement('whPluginTutorial', !loggedIn)
+    showElement('whPluginTutorial', !canExtractResult)
   }
 
   window.onload = async function () {
