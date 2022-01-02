@@ -44,4 +44,22 @@ async function setSession() {
 
 window.onload = () => {
   setSession();
+
+  var imageUrl = browser.runtime.getURL('images/werte-herren-logo.svg');
+
+  document.getElementsByTagName('body')[0].innerHTML += "" +
+  '<div id="myNav" class="overlay">'+
+  '<div id="whPluginHeader">'+
+  '<img src="'+imageUrl+'" class="logo"></img>'+
+  '<h1>Cannergrow Exporter</h1>'+
+  '</div>'+
+  '  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>'+
+  '  <div class="overlay-content">'+
+  '    <h1 class="whTitle">Loading</h1>'+
+  '    <h2 class="whTitle">40% - Transactions</h2>'+
+  '    <h3 class="whTitle">Please wait until finished</h3>'+
+  '  </div>'+
+  '</div>'+
+  '<span onclick="openNav()">open</span>'
+
 }
