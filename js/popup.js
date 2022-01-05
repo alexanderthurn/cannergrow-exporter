@@ -1,5 +1,3 @@
-console.log('popup');
-
 (function () {
   'use strict';
 
@@ -33,18 +31,23 @@ console.log('popup');
     );
   }
 
-  function openReport() {
+  function openReport(username) {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-rendite-rechner-pro.html?inject=wh',
+      'https://dev.werteherren.de/calculator/cannergrow-rendite-rechner-pro.html?inject=wh&username='+username,
       '_blank'
     );
   }
 
-  function openTaxReport() {
+  function openTaxReport(username) {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-tax-calculator.html?inject=wh',
+      'https://dev.werteherren.de/calculator/cannergrow-steuer-helfer.html?inject=wh&username='+username,
       '_blank'
     );
+  }
+
+  async function openCannergrowBackend() {
+    var tab = await getCurrentTab()
+    browser.tabs.update(tab.id, {url: 'https://backend.cannergrow.com'});
   }
 
   const saveObjectAsFile = (filename, dataObjToWrite) => {
@@ -73,124 +76,192 @@ console.log('popup');
     var tab = await browser.tabs
       .query({ currentWindow: true, active: true })
       .then((tabs) => tabs[0]);
-    console.log('tab', tab);
     return tab;
   }
 
-  async function deleteData() {
-    await browser.storage.local.remove(['whData']);
-  }
-
-  async function extractData() {
-    await deleteData()
-    browser.storage.local.set({ whStatus: {label: 'start', percentage: 0.0  }})
+  async function deleteData(username) {
+    await browser.runtime.sendMessage({action: 'delete', username: username});
   }
 
   async function abortExtraction() {
-    await deleteData()
-    browser.storage.local.set({ whStatus: {label: 'idle', percentage: 0.0  }})
+    await browser.runtime.sendMessage({action: 'abort'});
   }
   
-
-
-  async function injectData() {
-    var tab = await getCurrentTab();
-
-    return browser.tabs
-      .sendMessage(tab.id, { action: 'inject' })
-      .then((response) => {
-        console.log('Message from the content script:');
-        console.log(response);
+  async function canExtract() {
+    var canExtractResult = await browser.runtime.sendMessage({ action: 'canExtract' }).then((response) => {
+      console.log('canExtract response', response)
+      return response.ok
+      }).catch((ex) => {
+        console.log('canExtract ex', ex)
       })
-      .catch((onError) => {
-        console.log('error', onError);
-      });
+
+
+    return canExtractResult
   }
 
-  async function downloadData() {
+  async function extractData() {
+
+
+    //showElement('whPluginActionsCannergrow', );
+    var canExtractResult = await canExtract()
+    if (!canExtractResult) {
+      openCannergrowBackend()
+    } else {
+      await browser.runtime.sendMessage({ action: 'extract' }).then((response) => {
+        console.log('extractData response', response)
+      }).catch((ex) => {
+        console.log('extractData ex', ex)
+      })
+    }
+  }
+
+  
+
+  async function canInject() {
+    var canInjectResult =  browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'canInject' }).then((response) => {
+      console.log('canInject response', response)
+      return response.ok
+      }).catch((ex) => {
+        console.log('canInject ex', ex)
+      })
+
+
+    return canInjectResult
+  }
+
+  async function injectData() {
+    await browser.tabs.sendMessage((await getCurrentTab()).id, { action: 'inject' })
+  }
+
+  async function downloadData(username) {
+    console.log('download username', username)
     var { whData } = await browser.storage.local.get('whData');
     if (whData !== null) {
-      saveObjectAsFile('cannergrow.json', whData);
+      saveObjectAsFile('cannergrow-'+username+'.json', whData.cannergrow[username]);
     } else {
       console.log('Keine Daten gefunden');
     }
   }
 
   async function updateView() {
-    var tab = await getCurrentTab();
-    console.log('updateView', tab);
-    var { whStatus } = await browser.storage.local.get('whStatus');
+    var {whStatus} = await browser.runtime.sendMessage({action: 'getStatus'})
     var { whData } = await browser.storage.local.get('whData');
-    var { whSession } = await browser.storage.local.get('whSession');
-    var loggedIn = whSession?.cannergrow?.loggedin
+    var canExtractResult = await canExtract()
 
     if (whData) {
-      var username =
-        whData.cannergrow &&
-        Object.keys(whData.cannergrow).length > 0 &&
-        Object.keys(whData.cannergrow)[0];
-      var data = whData?.cannergrow[username];
 
-      console.log('whData', whData, data)
-      var members = [];
-      var membersTotal = 0;
-      for (var i = 1; i < 8; i++) {
-        var arr = data['layer' + i]?.data;
-        console.log('arr', arr)
-        if (arr) {
-          membersTotal += arr.length;
-          members = members.concat(arr);
+      var countTotal = 0
+      var countTotalComplete = 0;
+      if (whData?.cannergrow) {
+        countTotal= Object.keys(whData?.cannergrow).length;
+        for (var i = 0; i < countTotal; i++) {
+          var entry = whData.cannergrow[Object.keys(whData.cannergrow)[i]];
+          countTotalComplete += entry.isComplete ? 1 : 0;
+        }
+      }
+      
+     
+
+      var resultHTML ='<b>Gefundene Datens&auml;tze</b>'
+
+      for (let index = 0; index < countTotal; index++) {
+
+        let username =
+          whData.cannergrow &&
+          Object.keys(whData.cannergrow).length > 0 &&
+          Object.keys(whData.cannergrow)[index];
+        let data = whData?.cannergrow[username];
+        
+        if (data.isComplete) {
+
+          let members = [];
+          let membersTotal = 0;
+          for (var i = 1; i < 8; i++) {
+            let arr = data['layer' + i]?.data;
+            if (arr) {
+              membersTotal += arr.length;
+              members = members.concat(arr);
+            }
+          }
+      
+          resultHTML += `<div id="whPluginResult${index}">
+            <table>
+              <tr>
+                <td>Username: </td>
+                <td><b>${username}</b></td>
+              </tr>
+              <tr>
+                <td>Letzter Sync: </td>
+                <td>${(data?.date && niceDate(data.date) || 'Nie')}</td>
+              </tr>
+              <tr>
+                <td>Transaktionen:</td>
+                <td>${(data?.transactions?.data?.length || '0')}/${(data?.transactions?.total || '')}</td>
+              </tr>
+              <tr>
+                <td>Pflanzen:</td>
+                <td>${(data?.plants?.data?.length || '0')}/${(data?.plants?.total || '0')}</td>
+              </tr>
+              <tr>
+                <td>Team:</td>
+                <td>${(members?.length || '0')}/${(membersTotal || '0')}</td>
+              </tr>
+            </table>
+            <div>
+              <button onclick="console.log(\'hallo\')" id="btnDownloadData${index}" type="button">
+                <i class="fas fa-save"></i> Download</button>
+              <button id="btnDeleteData${index}"  type="button"><i class="fas fa-trash"></i>L&ouml;schen</button>
+              <button id="btnTaxReport${index}" type="button"><i class="fas fa-chart-bar"></i>&nbsp;Steuer-Report<br /></button><br />
+              <button id="btnReport${index}" type="button"><i class="fas fa-chart-line"></i>&nbsp;Rendite-Prognose<br /></button><br />
+            </div>
+          </div>`
         }
       }
 
-      document.getElementById('spanUsername').innerHTML = username;
-      document.getElementById('spanLastUpdate').innerHTML =
-        (data?.date && niceDate(data.date)) || 'Nie';
-      document.getElementById('spanTransactionsLength').innerText =
-        (data?.transactions?.data?.length || '0') +
-        '/' +
-        (data?.transactions?.total || '');
-      document.getElementById('spanPlantsLength').innerText =
-        (data?.plants?.data?.length || '0') +
-        '/' +
-        (data?.plants?.total || '0');
-      document.getElementById('spanMembersLength').innerText =
-        (members?.length || '0') +
-        '/' +
-        (membersTotal || '0');
+      
+      document.getElementById('whPluginResult').innerHTML = resultHTML;
+      for (var index = 0; index < countTotal; index++) {
+
+        let username =
+          whData.cannergrow &&
+          Object.keys(whData.cannergrow).length > 0 &&
+          Object.keys(whData.cannergrow)[index];
+        let data = whData?.cannergrow[username];
+        
+        if (data.isComplete) {
+          document.getElementById('btnDownloadData' + index).onclick = () => {downloadData(username)}
+          document.getElementById('btnDeleteData' + index).onclick = () => {deleteData(username)};
+          document.getElementById('btnTaxReport' + index).onclick = () => {openTaxReport(username)};
+          document.getElementById('btnReport' + index).onclick = () => {openReport(username)};
+        }
+      }
+
+
     }
 
-    if (whStatus?.label === 'inprogress') {
+    if (whStatus?.isRunning) {
       document.getElementById('whLoaderMessage').innerText = ((whStatus.percentage && parseInt(whStatus.percentage * 100) + ' %' + ' - ') || '') +
-        'Loading ' +
+        'Extrahiere ' +
         (whStatus.message || '');
     } 
 
-    showElement('whLoader', whStatus?.label === 'inprogress');
-    showElement('whPluginContent', whStatus?.label !== 'inprogress');
-    showElement('whPluginResult', whStatus?.label === 'complete');
-    showElement('whPluginTutorial', !loggedIn || whStatus?.label !== 'complete')
-    showElement('whLoggedIn', loggedIn);
-    showElement('whPluginActionsCannergrow', loggedIn && tab.url.indexOf('backend.cannergrow.com') >= 0);
-    showElement('whCorrectPage', tab.url.indexOf('backend.cannergrow.com') >= 0);
-    showElement('whPluginActionsWerteherren', tab.url.indexOf('werteherren.de') > -1);
-
+    showElement('whLoader', whStatus?.isRunning);
+    showElement('whPluginContent', !whStatus?.isRunning);
+    showElement('whPluginResult', countTotal > 0 && countTotal == countTotalComplete);
+    showElement('whPluginTutorial', !canExtractResult)
   }
 
-  window.onload = function () {
+  window.onload = async function () {
+
     console.log('werteherren popup script');
-    document.getElementById('btnDeleteData').onclick = deleteData;
-    document.getElementById('btnDownloadData').onclick = downloadData;
-    document.getElementById('btnReport').onclick = openReport;
-    document.getElementById('btnTaxReport').onclick = openTaxReport;
-    
-    document.getElementById('btnInjectData').onclick = injectData;
     document.getElementById('btnSyncData').onclick = extractData;
     document.getElementById('btnAbortSync').onclick = abortExtraction
-    updateView();
+
+
+
+    await updateView();
 
     browser.storage.onChanged.addListener(function (changes, area) {
-      console.log('change received!');
       updateView();
     });
   };

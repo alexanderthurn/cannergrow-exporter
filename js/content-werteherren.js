@@ -10,16 +10,28 @@ async function injectData() {
     }
 }
 
-// data should be injected
+async function canInject() {
+    var result = false
+
+    if (document.getElementById('whData')) {
+        result = true
+    }
+
+    return result
+}
+
 browser.runtime.onMessage.addListener((message) => {
     if (message.action === 'inject') {
         injectData();
+    } else if (message.action === 'canInject') {
+        return Promise.resolve({ ok: canInject()  })
     }
 });
 
 
-window.onload = function() {
-   if (window.location.href.indexOf('inject=wh') >= 0) {
-      injectData();
-   }
+window.onload = async function() {
+    console.log('werteherren onload', canInject())
+    if (canInject() && window.location.href.indexOf('inject=wh') >= 0) {
+        injectData();
+    }
 }

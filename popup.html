@@ -24,70 +24,16 @@
 
     <div id="whPluginContent">
 
-      <div id="whPluginTutorial">
-        <span>Dieses Plugin exportiert Team-Infos und Transaktionen aus Cannergrow. Du kannst sie im JSON-Format
-          herunterladen oder f&uuml;r den Steuer-Rechner und den Rendite-Rechner von Werteherren.de verwenden.</span>
-        <h2>Um dieses Plugin zu benutzen:</h2>
-        <ol>
-          <li>Gehe auf <a target="blank" href="https://cannergrow.com/r/XJ7QY3">Cannergrow.com</a> <i id="whCorrectPage"
-              class="fas fa-check"></i></li>
-          <li>Logge dich ein <i id="whLoggedIn" class="fas fa-check"></i></li>
-          <li>&Ouml;ffne dieses Plugin und dr&uuml;cke auf "Sync"</li>
-        </ol>
-      </div>
-
       <div id="whPluginActionsCannergrow">
         <b>Cannergrow.com</b>
-        <button id="btnSyncData" type="button"><i class="fas fa-sync"></i> Sync</button><br /><br />
+        <button id="btnSyncData" type="button"><i class="fas fa-sync"></i> Sync</button>
+        <span id="whPluginTutorial">Bitte sicherstellen, dass Cannergrow-Backend offen und eingeloggt!</span>
       </div>
+
+      <br />
 
       <div id="whPluginResult">
-        <b>Gefundene Datens&auml;tze</b>
-
-        <div id="whPluginResult0">
-          <table>
-            <tr>
-              <td>Username: </td>
-              <td id="spanUsername"></td>
-            </tr>
-            <tr>
-              <td>Letzter Sync: </td>
-              <td id="spanLastUpdate"></td>
-            </tr>
-            <tr>
-              <td>Transaktionen:</td>
-              <td id="spanTransactionsLength"></td>
-            </tr>
-            <tr>
-              <td>Pflanzen:</td>
-              <td id="spanPlantsLength"></td>
-            </tr>
-            <tr>
-              <td>Team:</td>
-              <td id="spanMembersLength"></td>
-            </tr>
-          </table>
-
-          <div>
-            <button id="btnDownloadData" type="button">
-              <i class="fas fa-save"></i> Download</button>
-            <button id="btnDeleteData" type="button"><i class="fas fa-trash"></i> Reset</button>
-          </div>
-          <div id="whPluginActionsWerteherren">
-            <button id="btnInjectData" type="button">
-              <i class="fas fa-save"></i> Daten einf&uuml;gen</button>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <br />
-        <br />
-        <b>Quick Links</b>
-        <button id="btnTaxReport" type="button"><i class="fas fa-chart-bar"></i>Steuer-Report<br />(Nur f&uuml;r
-          Team-Mitglieder mit Pflanzen)</button><br />
-        <button id="btnReport" type="button"><i class="fas fa-chart-line"></i> Rendite-Rechner PRO<br />(Kostenloser
-          Account auf werteherren.de reicht aus)</button><br />
+       
       </div>
 
       <div id="whPluginAbout">
