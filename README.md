@@ -26,19 +26,19 @@ Cannergrow Exporter - Chrome Browser Plugin to download all your data from Canne
 
 ## Development
 
-Firefox: 
-
-- Warning: As the time i am writing this, Firefox does not support the manifest v3 so this extension does not work. 
-- Go to about:debugging#/runtime/this-firefox
-- Click on "Load Temporary Add-On"
-- Select any file within this directory (e.g. manifest.json)
-
 Chrome:
 
 - Go to chrome://extensions/
 - Activate Developer Mode if not yet done
 - Click on "Load unpacked extension"
 - Select this directory
+
+Firefox: 
+
+- Warning: As the time i am writing this, Firefox does not support the manifest v3 so this extension does not work. 
+- Go to about:debugging#/runtime/this-firefox
+- Click on "Load Temporary Add-On"
+- Select any file within this directory (e.g. manifest.json)
 
 ## Support
 
