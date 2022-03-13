@@ -436,3 +436,9 @@ browser.runtime.onSuspend.addListener(() => {
 
 console.log('werteherren service worker init');
 updateView();
+
+/*
+
+https://api.cannergrow.com/api/user/team/layers
+
+*/

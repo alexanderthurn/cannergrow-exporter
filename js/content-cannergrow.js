@@ -3,12 +3,19 @@ console.log('werteherren content script');
 function whGetTokenAndUsername() {
   var token = JSON.parse(localStorage.getItem('vuex'))?.token?.access_token;
   var loggedin = token ? true : false;
-  var username =
+  var username
+  
+  try {
+    username =
     token &&
     document
       ?.getElementsByClassName('user-block-name')[0]
       ?.innerText?.split(',')[1]
       .trim();
+  } catch (ex) {
+    username = null
+  }
+ 
 
   return { loggedin: loggedin, token: token, username: username };
 }
@@ -83,11 +90,13 @@ var sessionOld = null;
 
 var checkSessionChangeAndSendIfYes = () => {
   var session = whGetTokenAndUsername();
+  console.log('checkSessionChangeAndSendIfYes')
 
   if (
     session?.loggedin !== sessionOld?.loggedin &&
     document.visibilityState === 'visible'
   ) {
+    console.log('sendSession')
     sendSessionToBackgroundScript(session);
     whUpdateView();
     sessionOld = session;
