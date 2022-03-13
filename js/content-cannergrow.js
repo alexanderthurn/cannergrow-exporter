@@ -52,20 +52,21 @@
     );
   }
 
+  
+
 
 window.onload = function() {
 
   console.log('werteherren plugin inject')
 
  
-
-
   var isRunning = false;
   var hasDownload = false
 
-  function download(event) {
+  function download(username) {
+  }
+  function extract(username) {
     if (!isRunning) {
-      event.preventDefault();
       isRunning = true;  
       hasDownload = false
       updateView()
@@ -76,10 +77,9 @@ window.onload = function() {
         updateView()
       }, 2000)
     }
-   
-    return false;
-
   }
+
+  
 
   function updateView() {
 
@@ -98,10 +98,14 @@ window.onload = function() {
         document.getElementById('whDownloadButtonOuter').style.visibility = 'visible'
         document.getElementById('whTaxButtonOuter').style.visibility = 'visible'
         document.getElementById('whRenditeButtonOuter').style.visibility = 'visible'
+        document.getElementById('whTaxButtonOuter').style.height = 'auto'
+        document.getElementById('whRenditeButtonOuter').style.height = 'auto'
     } else {
       document.getElementById('whDownloadButtonOuter').style.visibility = 'collapse'
       document.getElementById('whTaxButtonOuter').style.visibility = 'collapse'
       document.getElementById('whRenditeButtonOuter').style.visibility = 'collapse'
+      document.getElementById('whTaxButtonOuter').style.height = '0'
+      document.getElementById('whRenditeButtonOuter').style.height = '0'
     }
 
   }
@@ -111,7 +115,7 @@ window.onload = function() {
     if(!document.getElementById('whPluginOuter') && navs.length > 0) {
    
       var imageUrl = browser.runtime.getURL('images/CGRWH128.png');
-      var elemExtract = htmlToElement('<li id="whExtractButtonOuter" style="margin-bottom: -20px"><a id="whExtractButton" href="/dashboard"><span id="whExtractButtonText"></span></a></li>')
+      var elemExtract = htmlToElement('<li id="whExtractButtonOuter" style="margin-bottom: -10px"><a id="whExtractButton" href="/dashboard"><span id="whExtractButtonText"></span></a></li>')
       var elemDownload = htmlToElement('<li id="whDownloadButtonOuter" style="margin-bottom: -20px"><a id="whDownloadButton" href="/dashboard"><img style="width:40px; margin-left: -4px; margin-right: 10px" src="'+imageUrl+'" /><span id="whExtractButtonText">Download</span></a></li>')
       var elemTaxTool = htmlToElement('<li id="whTaxButtonOuter" style="margin-bottom: -20px"><a id="whTaxButton" href="/dashboard"><img style="width:40px; margin-left: -4px; margin-right: 10px" src="'+imageUrl+'" /><span id="whExtractButtonText">Steuer-Tool</span></a></li>')
       var elemRenditeTool = htmlToElement('<li id="whRenditeButtonOuter" style="margin-bottom: -10px"><a id="whRenditeButton" href="/dashboard"><img style="width:40px; margin-left: -4px; margin-right: 10px" src="'+imageUrl+'" /><span id="whExtractButtonText">Rendite-Tool</span></a></li>')
@@ -123,10 +127,11 @@ window.onload = function() {
       navs[0].parentElement.insertBefore(elemHeader, elemExtract)
   
       var username = whGetTokenAndUsername().username
-      
-      document.getElementById('whExtractButton').onclick = download          
-      document.getElementById('whTaxButton').onclick = () => {openTaxReport(username)};
-      document.getElementById('whRenditeButton').onclick = () => {openReport(username)};
+
+      document.getElementById('whExtractButton').onclick =(event) => {extract(username); event.preventDefault();return false;};          
+      document.getElementById('whTaxButton').onclick = (event) => {openTaxReport(username); event.preventDefault();return false;};
+      document.getElementById('whRenditeButton').onclick = (event) => {openReport(username); event.preventDefault();return false;};
+      document.getElementById('whDownloadButton').onclick = (event) => {download(username); event.preventDefault();return false;};
       console.log('found and injected')
       updateView()
 
