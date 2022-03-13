@@ -21,7 +21,7 @@
     }
   ],
   "web_accessible_resources": [{
-    "resources": ["images/werte-herren-logo.svg"],
+    "resources": ["images/werte-herren-logo.svg", "images/CGRWH128.png"],
     "matches": ["https://*.werteherren.de/*", "https://*.backend.cannergrow.com/*"]
   }],
   "action": {
