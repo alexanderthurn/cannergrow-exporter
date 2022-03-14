@@ -108,13 +108,11 @@
   }
 
   async function extract(username) {
-    if (!(await isRunning())) {
-      runner = startExtraction(username).then(() => {
-        runner = null;
-        updateView();
-      });
+    runner = startExtraction(username).then(() => {
+      runner = null;
       updateView();
-    }
+    });
+    updateView();
   }
 
   async function deleteData(username) {
@@ -212,19 +210,20 @@
       navs[0].parentElement.insertBefore(elemExtract, elemDownload);
       navs[0].parentElement.insertBefore(elemHeader, elemExtract);
 
-
       document.getElementById('whExtractButton').onclick = (event) => {
         var username = whGetTokenAndUsername().username;
 
         var run = async () => {
-          if (await hasDownload()) {
-            deleteData(username)
-          } else {
-            extract(username);
+          if (!(await isRunning())) {
+            if (await hasDownload()) {
+              deleteData(username);
+            } else {
+              extract(username);
+            }
           }
-        }
+        };
 
-        run()
+        run();
 
         event.preventDefault();
         return false;
