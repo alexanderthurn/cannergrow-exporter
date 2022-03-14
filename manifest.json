@@ -3,9 +3,8 @@
   "description": "Download your transactions, team and more. Made by Alexander Thurn for Werteherren.de",
   "homepage_url": "https://werteherren.de",
   "version": "0.2.1",
-  "manifest_version": 3,
-  "permissions": ["storage"],
-  "host_permissions": ["https://api.cannergrow.com/*"],
+  "manifest_version": 2,
+  "permissions": ["storage", "https://api.cannergrow.com/*"],
   "content_scripts": [
     {
       "matches": ["https://*.backend.cannergrow.com/*"],
@@ -17,11 +16,9 @@
       "js": ["js/browser-polyfill.min.js", "js/content-werteherren.js"]
     }
   ],
-  "web_accessible_resources": [{
-    "resources": ["images/werte-herren-logo.svg", "images/CGRWH128.png"],
-    "matches": ["https://*.werteherren.de/*", "https://*.backend.cannergrow.com/*"]
-  }],
-  "action": {
+  "web_accessible_resources": ["images/werte-herren-logo.svg", "images/CGRWH128.png"],
+  "browser_action": {
+    "default_title": "Cannergrow Exporter",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "/images/WH16.png",
