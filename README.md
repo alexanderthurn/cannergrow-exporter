@@ -16,7 +16,7 @@ Chrome:
 - Install the plugin
 
 Firefox:
-- Open the [Chrome Web Store](https://addons.mozilla.org/en-US/firefox/)
+- Open the [Firefox Web Store](https://addons.mozilla.org/en-GB/firefox/addon/cannergrow-exporter/)
 - Install the plugin
 
 ## Usage
