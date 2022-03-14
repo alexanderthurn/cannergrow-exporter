@@ -30,28 +30,28 @@ Firefox:
 
 ## Development
 
-Firefox: 
+### Firefox
 
-- Go to about:debugging#/runtime/this-firefox
+- Go to [about:debugging#/runtime/this-firefox](about:debugging#/runtime/this-firefox)
 - Click on "Load Temporary Add-On"
 - Select any file within this directory (e.g. manifest.json)
 
-Chrome:
+### Chrome
 
-- Go to chrome://extensions/
+- Go to [chrome://extensions/](chrome://extensions/)
 - Activate Developer Mode if not yet done
 - Click on "Load unpacked extension"
 - Select this directory
 
-Edge:
+### Edge
 
-- Go to edge://extensions/
+- Go to [edge://extensions/](edge://extensions/)
 - Activate Developer Mode if not yet done
 - Click on "Load unpacked extension"
 - Select this directory
 
-Opera:
-- Go to opera://extensions
+### Opera
+- Go to [opera://extensions](opera://extensions)
 - Activate Developer Mode if not yet done
 - Click on "Load unpacked extension"
 - Select this directory
