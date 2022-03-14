@@ -82,7 +82,7 @@
 
   function openReport(username) {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-rendite-rechner-pro.html?inject=wh&username=' +
+      'https://werteherren.de/cannergrow/cannergrow-rendite-rechner-profi/?inject=wh&username=' +
         username,
       '_blank'
     );
@@ -90,7 +90,7 @@
 
   function openTaxReport(username) {
     window.open(
-      'https://dev.werteherren.de/calculator/cannergrow-steuer-helfer.html?inject=wh&username=' +
+      'https://werteherren.de/cannergrow/steuer-helfer?inject=wh&username=' +
         username,
       '_blank'
     );
