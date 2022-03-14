@@ -20,7 +20,7 @@ Cannergrow Exporter - Chrome Browser Plugin to download all your data from Canne
 - Make sure the plugin is installed (seeing the WH icon on the top right. If there is no icon, click on the icon looking like a puzzle and there click the "Pin" icon for this plugin)
 - Make sure you are registered on [Cannergrow](https://cannergrow.com/r/XJ7QY3)
 - Open your dashboard in [Cannergrow](https://cannergrow.com/r/XJ7QY3)
-- Click on the plugin icon and then on "Synchronize"
+- Make sure that the plugin is installed
 - Wait for the sync to finish. Then you can download the JSON
 - Optional: Make an account on [werteherren.de](https://werteherren.de) - It is 100% free and you can use the net return calculator even without being in the team
 
@@ -51,9 +51,6 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 
 ## TODO
 
-* Check login while surfing cannergrow
-* Better percentage while loading data (layer / length)
-* Add safe check if data needs to be updated
-* Faster data loading for team (parallel?)
-* Better Rendite-Prognose calculator
-* Warning Sign: ⚠
+* Firefox support
+* Good description
+* Store release
