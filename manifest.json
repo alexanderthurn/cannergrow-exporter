@@ -2,7 +2,7 @@
   "name": "Cannergrow Exporter",
   "description": "Download your transactions, team and more. Made by Alexander Thurn for Werteherren.de",
   "homepage_url": "https://werteherren.de",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "manifest_version": 3,
   "permissions": ["storage"],
   "host_permissions": ["https://api.cannergrow.com/*"],
