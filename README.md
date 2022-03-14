@@ -11,8 +11,12 @@ Cannergrow Exporter - Chrome Browser Plugin to download all your data from Canne
 
 ## Installation
 
-- Use Chrome (Firefox not supported yet due to manifest v3)
+Chrome:
 - Open the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions)
+- Install the plugin
+
+Firefox:
+- Open the [Chrome Web Store](https://addons.mozilla.org/en-US/firefox/)
 - Install the plugin
 
 ## Usage
@@ -20,7 +24,6 @@ Cannergrow Exporter - Chrome Browser Plugin to download all your data from Canne
 - Make sure the plugin is installed (seeing the WH icon on the top right. If there is no icon, click on the icon looking like a puzzle and there click the "Pin" icon for this plugin)
 - Make sure you are registered on [Cannergrow](https://cannergrow.com/r/XJ7QY3)
 - Open your dashboard in [Cannergrow](https://cannergrow.com/r/XJ7QY3)
-- Make sure that the plugin is installed
 - Wait for the sync to finish. Then you can download the JSON
 - Optional: Make an account on [werteherren.de](https://werteherren.de) - It is 100% free and you can use the net return calculator even without being in the team
 
@@ -28,7 +31,6 @@ Cannergrow Exporter - Chrome Browser Plugin to download all your data from Canne
 
 Firefox: 
 
-- Warning: As the time i am writing this, Firefox does not support the manifest v3 so this extension does not work. 
 - Go to about:debugging#/runtime/this-firefox
 - Click on "Load Temporary Add-On"
 - Select any file within this directory (e.g. manifest.json)
@@ -51,9 +53,20 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 
 ## TODO
 
-* Firefox support
 * Good description
 * Store release
+
+## License
+ 
+The MIT License (MIT)
+
+Copyright (c) 2015 Chris Kibble
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 
