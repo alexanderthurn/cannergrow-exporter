@@ -23,6 +23,31 @@
     );
   }
 
+  function addTimestamp(data) {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth() + 1;
+    var day = now.getDate();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+    var seconds = now.getSeconds();
+    var dateToSave =
+      year +
+      '-' +
+      month +
+      '-' +
+      day +
+      ' ' +
+      hours +
+      ':' +
+      minutes +
+      ':' +
+      seconds;
+    data.timestamp = now.getTime();
+    data.date = dateToSave;
+  }
+
+
   function whGetTokenAndUsername() {
     var token = JSON.parse(localStorage.getItem('vuex'))?.token?.access_token;
     var loggedin = token ? true : false;
@@ -95,16 +120,60 @@
     }
   }
 
+
+  async function fetchUrls(urls, token) {
+      try {
+          var data = await Promise.all(
+              urls.map(
+                  url =>
+                      fetch(url, {
+                        headers: new Headers({ Authorization: 'Bearer ' + token }),
+                      }).then(
+                          (response) => response.json()
+                      )));
+
+          return (data)
+
+      } catch (error) {
+          console.log(error)
+
+          throw (error)
+      }
+  }
+
   async function startExtraction(username) {
-    return new Promise((resolve, reject) => {
-      window.setTimeout(async function () {
-        var { whData } = await browser.storage.local.get('whData');
-        var data = whData?.cannergrow['werteherren'];
-        whData.cannergrow[username] = data;
-        await browser.storage.local.set({ whData: whData });
-        resolve();
-      }, 500);
-    });
+    var token = whGetTokenAndUsername().token;
+    var result = {
+      layers: '',
+      transactions: []
+    }
+    var urls = ['https://api.cannergrow.com/api/user/team/layers',
+      'https://api.cannergrow.com/api/wallet/transactions?page=1'
+    ]
+    
+    var resps = await fetchUrls(urls, token);
+    var data = await resps;
+    result.layers = data[0],
+    result.transactions = data[1].data
+
+    var urlsTransactions = []
+    for (var i=2;i <= data[1].meta.last_page; i++) {
+      urlsTransactions.push( 'https://api.cannergrow.com/api/wallet/transactions?page=' + i)
+    }
+    var respsTransactions = await fetchUrls(urlsTransactions, token);
+    var dataTransactions = await respsTransactions;
+    for (var i=0; i<dataTransactions.length;i++) {
+      result.transactions = result.transactions.concat(dataTransactions[i].data)
+    }
+
+    addTimestamp(result)
+
+    var { whData } = await browser.storage.local.get('whData');
+    if (!whData || !whData.cannergrow) {
+      whData = {cannergrow: {}}
+    }
+    whData.cannergrow[username] = result;
+    await browser.storage.local.set({ whData: whData });
   }
 
   async function extract(username) {
