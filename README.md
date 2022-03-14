@@ -24,6 +24,7 @@ Firefox:
 - Make sure the plugin is installed (seeing the WH icon on the top right. If there is no icon, click on the icon looking like a puzzle and there click the "Pin" icon for this plugin)
 - Make sure you are registered on [Cannergrow](https://cannergrow.com/r/XJ7QY3)
 - Open your dashboard in [Cannergrow](https://cannergrow.com/r/XJ7QY3)
+- Click on the "Start sync" button on the left in the menu "Werteherren"
 - Wait for the sync to finish. Then you can download the JSON
 - Optional: Make an account on [werteherren.de](https://werteherren.de) - It is 100% free and you can use the net return calculator even without being in the team
 
@@ -42,6 +43,20 @@ Chrome:
 - Click on "Load unpacked extension"
 - Select this directory
 
+Edge:
+
+- Go to edge://extensions/
+- Activate Developer Mode if not yet done
+- Click on "Load unpacked extension"
+- Select this directory
+
+Opera:
+- Go to opera://extensions
+- Activate Developer Mode if not yet done
+- Click on "Load unpacked extension"
+- Select this directory
+
+
 ## Support
 
 Please [open an issue](https://github.com/alexanderthurn/cannergrow-exporter/issues/new) for support.
@@ -54,7 +69,7 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 ## TODO
 
 * Good description
-* Store release
+* Better error handling
 
 ## License
  
