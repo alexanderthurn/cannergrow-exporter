@@ -65,6 +65,7 @@ window.onload = function() {
 
   function download(username) {
   }
+  
   function extract(username) {
     if (!isRunning) {
       isRunning = true;  
