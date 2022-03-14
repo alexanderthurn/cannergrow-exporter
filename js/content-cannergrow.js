@@ -158,17 +158,21 @@
     var token = whGetTokenAndUsername().token;
     var result = {
       layers: '',
-      transactions: []
+      transactions: [],
+      plants: []
     }
     var urls = ['https://api.cannergrow.com/api/user/team/layers',
-      'https://api.cannergrow.com/api/wallet/transactions?page=1'
+      'https://api.cannergrow.com/api/wallet/transactions?page=1',
+      'https://api.cannergrow.com/api/growing/plants?page=1'
     ]
     
     var resps = await fetchUrls(urls, token);
     var data = await resps;
     result.layers = data[0],
     result.transactions = data[1].data
+    result.plants = data[2].data
 
+    // tx
     var urlsTransactions = []
     for (var i=2;i <= data[1].meta.last_page; i++) {
       urlsTransactions.push( 'https://api.cannergrow.com/api/wallet/transactions?page=' + i)
@@ -179,7 +183,21 @@
       result.transactions = result.transactions.concat(dataTransactions[i].data)
     }
 
+    //plants
+    var urlsPlants = []
+    for (var i=2;i <= data[2].meta.last_page; i++) {
+      urlsPlants.push( 'https://api.cannergrow.com/api/growing/plants?page=' + i)
+    }
+    var respsPlants = await fetchUrls(urlsPlants, token);
+    var dataPlants = await respsPlants;
+    for (var i=0; i<dataPlants.length;i++) {
+      result.plants = result.plants.concat(dataPlants[i].data)
+    }
+
+
     addTimestamp(result)
+    result.username = username
+    result.version = 2
 
     var { whData } = await browser.storage.local.get('whData');
     if (!whData || !whData.cannergrow) {

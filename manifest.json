@@ -1,6 +1,6 @@
 {
   "name": "Cannergrow Exporter",
-  "description": "Download your transactions, team and more. Made by Alexander Thurn for werteherren.de",
+  "description": "Download your transactions, team and more. Made by Alexander Thurn for Werteherren.de",
   "homepage_url": "https://werteherren.de",
   "version": "0.1.0",
   "manifest_version": 3,
@@ -35,6 +35,5 @@
     "32": "/images/WH32.png",
     "48": "/images/WH48.png",
     "128": "/images/WH128.png"
-  },
-  "options_page": "options.html"
+  }
 }
