@@ -1,8 +1,8 @@
 {
   "name": "Cannergrow Exporter",
-  "description": "Download your transactions, team and more. Made by Alexander Thurn for Werteherren.de",
+  "description": "Download your cannergrow-transactions, e.g. to calculate how much tax you need to pay. Made by Alexander Thurn for Werteherren.de",
   "homepage_url": "https://werteherren.de",
-  "version": "0.2.1",
+  "version": "0.9.0.1",
   "manifest_version": 2,
   "permissions": ["storage", "https://api.cannergrow.com/*"],
   "content_scripts": [
