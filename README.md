@@ -1,6 +1,6 @@
 # cannergrow-exporter
 
-Cannergrow Exporter - Chrome Browser Plugin to download all your data from Cannergrow (plants, team, transactions) as a json, e.g. to create a tax report or calculate net return
+Browser Plugin to download your transactions from Cannergrow to create a tax report or calculate your net return
 
 ## Table of Contents
 
@@ -11,11 +11,11 @@ Cannergrow Exporter - Chrome Browser Plugin to download all your data from Canne
 
 ## Installation
 
-Chrome:
+Chrome (Not yet available):
 - Open the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions)
 - Install the plugin
 
-Firefox:
+Firefox (Not yet available):
 - Open the [Firefox Web Store](https://addons.mozilla.org/en-GB/firefox/addon/cannergrow-exporter/)
 - Install the plugin
 
@@ -31,6 +31,12 @@ Firefox:
 ## Development
 
 ### Firefox
+
+Firefox only supports v2 of plugins, v3 is activated per default so you need to:
+
+- Go to src/
+- Rename manifest.json to manifestv3.json
+- Rename manifestv2.json to manifest.json
 
 - Go to [about:debugging#/runtime/this-firefox](about:debugging#/runtime/this-firefox)
 - Click on "Load Temporary Add-On"
@@ -70,6 +76,10 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 
 * Good description
 * Better error handling
+
+## Permissions
+
+* Storage: The storage permission is needed, as the data can become quite large depending on how many transactions are available. The second reason is that there is a convience functionality where you as a user can insert the data on a calculator and summarize tool on the werteherren.de website (Keeps you from downloading the data and uploading it there)
 
 ## License
  
