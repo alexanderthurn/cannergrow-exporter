@@ -80,6 +80,7 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 ## Permissions
 
 * Storage: The storage permission is needed, as the data can become quite large depending on how many transactions are available. The second reason is that there is a convience functionality where you as a user can insert the data on a calculator and summarize tool on the werteherren.de website (Keeps you from downloading the data and uploading it there)
+* Host permission: As the data needs to be extracted via API, the HOST permission to the Cannergrow API needs to be granted. The data is then saved within the Plugin Storage.
 
 ## License
  
