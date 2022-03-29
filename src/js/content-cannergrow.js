@@ -82,7 +82,7 @@
 
   function openReport(username) {
     window.open(
-      'https://werteherren.de/cannergrow/cannergrow-rendite-rechner-profi/?inject=wh&username=' +
+      'https://werteherren.de/cannergrow/rendite-rechner-pro/?inject=wh&username=' +
         username,
       '_blank'
     );
