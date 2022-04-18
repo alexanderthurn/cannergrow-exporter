@@ -11,11 +11,11 @@ Browser Plugin to download your transactions from Cannergrow to create a tax rep
 
 ## Installation
 
-Chrome (Not yet available):
-- Open the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions)
+Chrome:
+- Open the [Chrome Web Store Link](https://chrome.google.com/webstore/detail/cannergrow-exporter/hffccnimagkjbbackieijelkgfhokfoh)
 - Install the plugin
 
-Firefox (Not yet available):
+Firefox:
 - Open the [Firefox Web Store](https://addons.mozilla.org/en-GB/firefox/addon/cannergrow-exporter/)
 - Install the plugin
 
