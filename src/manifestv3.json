@@ -3,8 +3,9 @@
   "description": "Download your transactions from Cannergrow to create a tax report or to calculate your net return",
   "homepage_url": "https://github.com/alexanderthurn/cannergrow-exporter",
   "version": "0.9.0.3",
-  "manifest_version": 2,
-  "permissions": ["storage", "https://api.cannergrow.com/*"],
+  "manifest_version": 3,
+  "permissions": ["storage"],
+  "host_permissions": ["https://api.cannergrow.com/*"],
   "content_scripts": [
     {
       "matches": ["https://*.backend.cannergrow.com/*"],
@@ -16,9 +17,16 @@
       "js": ["js/browser-polyfill.min.js", "js/content-werteherren.js"]
     }
   ],
-  "web_accessible_resources": ["images/werte-herren-logo.svg", "images/CGRWH128.png"],
-  "browser_action": {
-    "default_title": "Cannergrow Exporter",
+  "web_accessible_resources": [
+    {
+      "resources": ["images/werte-herren-logo.svg", "images/CGRWH128.png"],
+      "matches": [
+        "https://*.werteherren.de/*",
+        "https://*.backend.cannergrow.com/*"
+      ]
+    }
+  ],
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "/images/WH16.png",
