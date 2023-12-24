@@ -1,5 +1,7 @@
 #! /bin/bash
 
+echo switching to $1
+
 if [ "$1" = "dev" ]; then 
     cp misc/manifestdev.json src/manifest.json
 fi

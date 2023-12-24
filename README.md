@@ -1,6 +1,8 @@
 # cannergrow-exporter
 
-Browser Plugin to download your transactions from Cannergrow to create a tax report or calculate your net return
+Browser Plugin to download your transactions from Cannergrow to create a tax report or calculate your net return. 
+
+24.12.2023: Christmas Update - NOW totally free to use for everyone!
 
 ## Table of Contents
 
@@ -22,11 +24,10 @@ Firefox:
 ## Usage
 
 - Make sure the plugin is installed (seeing the WH icon on the top right. If there is no icon, click on the icon looking like a puzzle and there click the "Pin" icon for this plugin)
-- Make sure you are registered on [Cannergrow](https://cannergrow.com/r/XJ7QY3)
-- Open your dashboard in [Cannergrow](https://cannergrow.com/r/XJ7QY3)
+- Open your dashboard in [Cannergrow](https://cannergrow.com)
 - Click on the "Start sync" button on the left in the menu "Werteherren"
-- Wait for the sync to finish. Then you can download the JSON
-- Optional: Make an account on [werteherren.de](https://werteherren.de) - It is 100% free and you can use the net return calculator even without being in the team
+- Wait for the sync to finish. Then you can download a JSON, get a report about your earnings or estimate what you will earn in the future
+
 
 ## Development
 

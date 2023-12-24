@@ -2,24 +2,44 @@
   "name": "Cannergrow Exporter",
   "description": "Download your transactions from Cannergrow to create a tax report or to calculate your net return",
   "homepage_url": "https://github.com/alexanderthurn/cannergrow-exporter",
-  "version": "0.9.1.0",
+  "version": "abc",
   "manifest_version": 3,
-  "permissions": ["storage"],
-  "host_permissions": ["https://api.cannergrow.com/*"],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.cannergrow.com/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://*.backend.cannergrow.com/*"],
-      "js": ["js/browser-polyfill.min.js", "js/content-cannergrow.js"],
-      "css": ["css/content.css"]
+      "matches": [
+        "https://*.backend.cannergrow.com/*"
+      ],
+      "js": [
+        "js/browser-polyfill.min.js",
+        "js/content-cannergrow.js"
+      ],
+      "css": [
+        "css/content.css"
+      ]
     },
     {
-      "matches": ["https://*.werteherren.de/*"],
-      "js": ["js/browser-polyfill.min.js", "js/content-werteherren.js"]
+      "matches": [
+        "https://*.werteherren.de/*",
+        "file://*"
+      ],
+      "js": [
+        "js/browser-polyfill.min.js",
+        "js/content-werteherren.js"
+      ]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["images/werte-herren-logo.svg", "images/CGRWH128.png"],
+      "resources": [
+        "images/werte-herren-logo.svg",
+        "images/CGRWH128.png"
+      ],
       "matches": [
         "https://*.werteherren.de/*",
         "https://*.backend.cannergrow.com/*"
