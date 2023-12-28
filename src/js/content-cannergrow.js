@@ -89,11 +89,15 @@
   }
 
   function openTaxReport(username) {
-    window.open(
+    /*window.open(
       'https://werteherren.de/cannergrow/steuer-helfer?inject=wh&username=' +
         username,
       '_blank'
-    );
+    );*/
+
+
+    document.getElementsByClassName('content-wrapper')[0].innerHTML = '<iframe src="https://werteherren.de/cannergrow/steuer-helfer?inject=wh&username=' +
+    username + '" />'
   }
 
   var runner = null;
