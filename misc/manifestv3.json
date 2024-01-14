@@ -2,7 +2,7 @@
   "name": "Cannergrow Exporter",
   "description": "Download your transactions from Cannergrow to create a tax report or to calculate your net return",
   "homepage_url": "https://github.com/alexanderthurn/cannergrow-exporter",
-  "version": "0.9.1.0",
+  "version": "0.9.2.0",
   "manifest_version": 3,
   "permissions": ["storage"],
   "host_permissions": ["https://api.cannergrow.com/*"],
@@ -40,5 +40,12 @@
     "32": "/images/WH32.png",
     "48": "/images/WH48.png",
     "128": "/images/WH128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{5a8c0627-035c-40e5-a4f6-400784e38eef}",
+      "strict_min_version": "109.0"
+    }
   }
+  
 }

@@ -40,5 +40,11 @@
     "32": "/images/WH32.png",
     "48": "/images/WH48.png",
     "128": "/images/WH128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "cannergrow-exporter@werteherren.de",
+      "strict_min_version": "42.0"
+    }
   }
 }
