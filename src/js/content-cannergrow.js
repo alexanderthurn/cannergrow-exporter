@@ -141,14 +141,25 @@
 
   async function fetchUrls(urls, token) {
       try {
-          var data = await Promise.all(
-              urls.map(
-                  url =>
-                      fetch(url, {
-                        headers: new Headers({ Authorization: 'Bearer ' + token }),
-                      }).then(
-                          (response) => response.json()
-                      )));
+          const data = [];
+      
+          for (const url of urls) {
+              const response = await fetch(url, {
+                  headers: new Headers({Authorization: 'Bearer ' + token})
+              });
+        
+              const remainingRequests = parseInt(response.headers.get('x-ratelimit-remaining'));
+        
+              // Überprüfen, ob das Rate Limit bald erreicht ist
+              if (remainingRequests < 5) { // Schwellenwert nach Bedarf anpassen
+                  const waitTime = 60;
+                  console.warn(`Fast am Rate Limit! Warte ${waitTime} Sekunden, bevor die nächste Anfrage gesendet wird.`);
+                  await new Promise(resolve => setTimeout(resolve, waitTime*1000));
+              }
+        
+              const jsonResponse = await response.json();
+              data.push(jsonResponse);
+          }
 
           return (data)
 
