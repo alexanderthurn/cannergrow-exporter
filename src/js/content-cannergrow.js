@@ -143,12 +143,14 @@
       try {
           var data = await Promise.all(
               urls.map(
-                  url =>
-                      fetch(url, {
-                        headers: new Headers({ Authorization: 'Bearer ' + token }),
-                      }).then(
-                          (response) => response.json()
-                      )));
+                  (url, index) =>
+                      new Promise(resolve => setTimeout(resolve, index * 1000))
+                          .then(() =>
+                              fetch(url, {
+                                headers: new Headers({ Authorization: 'Bearer ' + token }),
+                              }).then(
+                                  (response) => response.json()
+                              ))));
 
           return (data)
 
